@@ -26,8 +26,8 @@ module block_controller(
 		else	
 			rgb=background;
 	end
-		//the +-5 for the positions give the dimension of the block (i.e. it will be 10x10 pixels)
-	assign block_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-5) && hCount<=(xpos+5);
+		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
+	assign block_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
 	
 	always@(posedge clk, posedge rst) 
 	begin
@@ -35,7 +35,7 @@ module block_controller(
 		begin 
 			//rough values for center of screen
 			xpos<=450;
-			ypos<=250;
+			ypos<=500;
 		end
 		else if (clk) begin
 		
@@ -55,16 +55,16 @@ module block_controller(
 				if(xpos==150)
 					xpos<=800;
 			end
-			else if(up) begin
-				ypos<=ypos-2;
-				if(ypos==34)
-					ypos<=514;
-			end
-			else if(down) begin
-				ypos<=ypos+2;
-				if(ypos==514)
-					ypos<=34;
-			end
+			// else if(up) begin
+			// 	ypos<=ypos-2;
+			// 	if(ypos==34)
+			// 		ypos<=514;
+			// end
+			// else if(down) begin
+			// 	ypos<=ypos+2;
+			// 	if(ypos==514)
+			// 		ypos<=34;
+			// end
 		end
 	end
 	
