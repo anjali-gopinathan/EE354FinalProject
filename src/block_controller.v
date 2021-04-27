@@ -9,25 +9,54 @@ module block_controller(
 	output reg [11:0] rgb,
 	output reg [11:0] background
    );
-	wire block_fill;
+	wire paddle_fill;
+
+	integer block_grid_i, integer block_grid_j;
+	integer i = 0;
 	
 	//these two values dictate the center of the block, incrementing and decrementing them leads the block to move in certain directions
 	reg [9:0] xpos, ypos;
 	
 	parameter RED   = 12'b1111_0000_0000;
+	parameter PINK  = 12'b1111_0000_1111;
 	
+/**	Fill grid of blocks
+*/	
+	// reg [60:0] blocks;
+	reg [12:0] blocks [60:0];
+
+	// each block will be 53 wide, 12 blocks wide, 0px in between each block
+	// 25 pixels tall, 5 rows, 0 px in between
+
+	for( block_grid_i = 0; block_grid_i < 5; block_grid_i++ ){		// i represents rows
+		for(block_grid_j = 0; block_grid_j < 12; block_grid_j++){		
+			// assign paddle_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
+			
+			// currently not storing coordinates, but assigning blocks to spots. need to store these in an 
+			// array later but idk how to do that yet so we're j overwriting the same variable 
+			assign blocks[i] = 
+				vCount >= ((block_grid_i*25) + 50) &&		// top
+				vCount <= ((block_grid_i*25) + 75) &&		// bottom
+				hCount >= ((block_grid_j*53) + 150) &&		// left
+				hCount <= ((block_grid_j*53) + 203);		// right
+			i <= i + 1;
+		}
+	}
+
 	/*when outputting the rgb value in an always block like this, make sure to include the if(~bright) statement, as this ensures the monitor 
 	will output some data to every pixel and not just the images you are trying to display*/
 	always@ (*) begin
     	if(~bright )	//force black if not inside the display area
 			rgb = 12'b0000_0000_0000;
-		else if (block_fill) 
+		else if (paddle_fill) 
 			rgb = RED; 
+		else if (blocks)
+			rgb = PINK;
 		else	
 			rgb=background;
 	end
 		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
-	assign block_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
+	assign paddle_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
 	
 	always@(posedge clk, posedge rst) 
 	begin
@@ -48,12 +77,12 @@ module block_controller(
 			if(right) begin
 				xpos<=xpos+2; //change the amount you increment to make the speed faster 
 				if(xpos==800) //these are rough values to attempt looping around, you can fine-tune them to make it more accurate- refer to the block comment above
-					xpos<=150;
+					xpos<=800;		// if wrapping, set to 150
 			end
 			else if(left) begin
 				xpos<=xpos-2;
 				if(xpos==150)
-					xpos<=800;
+					xpos<=150;		// if wrapping, set xpos to 800
 			end
 			// else if(up) begin
 			// 	ypos<=ypos-2;
@@ -70,17 +99,17 @@ module block_controller(
 	
 	//the background color reflects the most recent button press
 	always@(posedge clk, posedge rst) begin
-		if(rst)
-			background <= 12'b1111_1111_1111;
-		else 
-			if(right)
-				background <= 12'b1111_1111_0000;
-			else if(left)
-				background <= 12'b0000_1111_1111;
-			else if(down)
-				background <= 12'b0000_1111_0000;
-			else if(up)
-				background <= 12'b0000_0000_1111;
+		// if(rst)
+		background <= 12'b1111_1111_1111;
+		// else 
+		// 	if(right)
+		// 		background <= 12'b1111_1111_0000;		// yellow orange ish
+		// 	else if(left)
+		// 		background <= 12'b0000_1111_1111;		// light blue
+		// 	else if(down)
+		// 		background <= 12'b0000_1111_0000;		// bright green
+		// 	else if(up)
+		// 		background <= 12'b0000_0000_1111;		// royal blue
 	end
 
 	
