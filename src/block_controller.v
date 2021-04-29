@@ -152,9 +152,12 @@ module block_controller(
 
 			//rough values for center of screen
 			background <= WHITE;
-			score_ones <= 4'bx;
-			score_tens <= 4'bx;
-			lives <= 4'bx;
+			// score_ones <= 4'bx;
+			// score_tens <= 4'bx;
+			// lives <= 4'bx;
+			score_ones <= 0;
+			score_tens <= 0;
+			lives <= 9;
 
 			xpos <= 450;
 			ypos <= 500;
@@ -224,7 +227,7 @@ module block_controller(
 			else if (ball_y >= FLOOR_Y)		// hit floor, bad die
 			begin
 				// for now gonna make it bounce, but later decrement lives and stuff
-				ball_y_vel = -ball_y_vel;
+				// ball_y_vel = -ball_y_vel;
 				lives <= lives - 1;
 
 			end
