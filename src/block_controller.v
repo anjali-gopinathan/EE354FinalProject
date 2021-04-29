@@ -32,8 +32,8 @@ module block_controller(
 	PURPLE		= 12'b1000_0010_1111;
 	
 	localparam
-	LEFT_WALL_X = 144,
-	RIGHT_WALL_X = 783,
+	LEFT_WALL_X = 220,		// supposed to be 144
+	RIGHT_WALL_X = 790,		// maybe 783?
 	CEILING_Y = 35,
 	FLOOR_Y = 515,
 	BOTTOM_OF_GRID_Y = 160,
@@ -198,6 +198,20 @@ module block_controller(
 			begin
 				ball_y_vel = -ball_y_vel;		// reverse ball's y velocity
 			end
+			else if (ball_x >= RIGHT_WALL_X || ball_x <= LEFT_WALL_X)		// side wall collision
+			begin
+				ball_x_vel = -ball_x_vel;
+			end
+			else if (ball_y <= CEILING_Y)	// ceiling collision
+			begin
+				ball_y_vel = -ball_y_vel;
+			end
+			else if (ball_y >= FLOOR_Y)		// hit floor, bad die
+			begin
+				// for now gonna make it bounce, but later decrement lives and stuff
+				ball_y_vel = -ball_y_vel;
+			end
+
 			// block collisions
 			else
 			begin
