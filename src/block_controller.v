@@ -14,12 +14,6 @@ module block_controller(
 
 	integer i;
 	integer j;
-
-	// integer block_grid_i;
-	// integer block_grid_j;
-	reg [5:0] k = 0;
-
-	
 	
 	//these two values dictate the center of the block, incrementing and decrementing them leads the block to move in certain directions
 	reg [9:0] xpos, ypos;
@@ -44,25 +38,24 @@ module block_controller(
 
 	// each block will be 53 wide, 12 blocks wide, 0px in between each block
 	// 25 pixels tall, 5 rows, 0 px in between
-	
 	// entire vga monitor pixels:
-	// cols aka x pos: starts at 144 ish (150 px), ends at  approx 800 (780 ish)
+	// cols aka x pos: starts at 144 ends at 780
 	// rows aka y pos: starts at 34px, ends at ~514px
-		// but for our block_grid, rows end at 159 px.
+	// but for our block_grid, rows end at 159 px.
 	genvar block_i;
 	genvar block_j;
 	generate
-	for(block_i = 0; block_i < 12; block_i = block_i + 1)
+	for(block_i = 0; block_i < 5; block_i = block_i + 1)
 	begin			// i represents x pos
-		for( block_j = 0; block_j < 5; block_j = block_j + 1)
+		for( block_j = 0; block_j < 12; block_j = block_j + 1)
 		begin		// j represents y pos	
 			// parameter x_pos = block_i*53 + 144;
 			// parameter y_pos = block_j*25 + 34;		
 			assign blocks_fill[block_i][block_j] = 
-				(vCount >= block_j*25 + 34) &&		// top
+				(vCount >= (block_j*25 + 34)) &&		// top
 				(vCount <= (block_j*25 + 59)) &&		// bottom
-				(hCount >= block_i*53 + 144) &&		// left
-				(hCount <= (block_i*53 + 197));		// right
+				(hCount >= (block_i*53 + 144)) &&		// left
+				(hCount <= (block_i*53 + 197));			// right
 		end
 	end
 	endgenerate
@@ -114,9 +107,9 @@ module block_controller(
 	end
 		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
 	assign paddle_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
-	assign background_fill=vCount>=(159);
+	assign background_fill= vCount>=(159);
 
-	always@(posedge clk) 
+	always@(posedge clk, posedge rst) 
 	begin
 		if(rst)
 		begin 
@@ -132,10 +125,8 @@ module block_controller(
 				begin: block_init		// j represents y pos			
 					// parameter x_pos = block_i*53 + 144;
 					// parameter y_pos = block_j*25 + 34;						
-					// currently not storing coordinates, but assigning blocks to spots. need to store these in an 
-					// array later but idk how to do that yet so we're j overwriting the same variable 
 					blocks[i][j][21:12] <= i*53 + 144;		// x pos
-					blocks[i][j][11:2] <= j*25 + 34;			// y pos
+					blocks[i][j][11:2] <= j*25 + 34;		// y pos
 					if ((i % 2) == 0)
 						begin
 							if ((j % 2) == 0) blocks[i][j][1] <= 1;				// 1 = red
