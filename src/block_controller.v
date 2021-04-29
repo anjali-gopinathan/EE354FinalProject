@@ -8,8 +8,11 @@ module block_controller(
 	input left, input right,
 	input [9:0] hCount, vCount,
 	output reg [11:0] rgb,
-	output reg [11:0] background
-   );
+	output reg [11:0] background,
+	output reg [3:0] score_ones,
+	output reg [3:0] score_tens,
+	output reg [3:0] lives
+   ); 	
 	wire paddle_fill;
 	wire background_fill;
 	wire ball_fill;
@@ -107,6 +110,17 @@ module block_controller(
 						begin
 							//set rgb to background
 							rgb=WHITE;
+							score_ones <= score_ones + 1;
+							if(score_ones == 9)
+							begin
+								score_ones <= 0;
+								score_tens <= score_tens + 1;
+								if(score_tens == 9)
+								begin
+									score_tens <= 9;
+									score_ones <= 9;
+							end
+
 						end
 						else	//block has not been hit
 						begin
@@ -124,7 +138,7 @@ module block_controller(
 			end
 		end
 		else	// background fill (hcount and vcount are below the blocks)
-			rgb = BRIGHT_GREEN;
+			rgb = WHITE;
 			
 	end
 		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
@@ -142,6 +156,9 @@ module block_controller(
 		begin 
 			//rough values for center of screen
 			background <= WHITE;
+			score_ones <= 0;
+			score_tens <= 0;
+			lives <= 9;
 
 			xpos<=450;
 			ypos<=500;
@@ -155,8 +172,8 @@ module block_controller(
 				begin: block_init		// j represents y pos			
 					// parameter x_pos = block_i*53 + 144;
 					// parameter y_pos = block_j*25 + 34;						
-					blocks[j][i][21:12] <= i*53 + 144;		// x pos
-					blocks[j][i][11:2] <= j*25 + 34;		// y pos
+					blocks[j][i][21:12] <= i*BLOCK_WIDTH + LEFT_WALL_X;		// x pos
+					blocks[j][i][11:2] <= j*BLOCK_HEIGHT + CEILING_Y;		// y pos
 					if ((i % 2) == 0)
 						begin
 							if ((j % 2) == 0) blocks[j][i][1] <= 0;				// 1 = pink
@@ -173,7 +190,7 @@ module block_controller(
 
 			// initialize ball to go Southeast 
 			ball_x_vel <= 2;
-			ball_y_vel <= -2;
+			ball_y_vel <= 2;
 
 		end
 		else if (clk) begin
@@ -216,6 +233,8 @@ module block_controller(
 				test = 4;
 				// for now gonna make it bounce, but later decrement lives and stuff
 				ball_y_vel = -ball_y_vel;
+				lives <= lives - 1;
+
 			end
 			// block collisions
 			else

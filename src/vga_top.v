@@ -49,7 +49,7 @@ module vga_top(
 	wire rst;
 	
 	reg [3:0]	SSD;
-	wire [3:0]	SSD3, SSD2, SSD1, SSD0;
+	wire [3:0]	SSD7, SSD1, SSD0;
 	reg [7:0]  	SSD_CATHODES;
 	wire [1:0] 	ssdscan_clk;
 	
@@ -65,7 +65,7 @@ module vga_top(
 	assign move_clk=DIV_CLK[19]; //slower clock to drive the movement of objects on the vga screen
 	wire [11:0] background;
 	display_controller dc(.clk(ClkPort), .hSync(hSync), .vSync(vSync), .bright(bright), .hCount(hc), .vCount(vc));
-	block_controller sc(.fastClk(ClkPort), .clk(move_clk), .bright(bright), .rst(BtnC),.left(BtnL),.right(BtnR),.hCount(hc), .vCount(vc), .rgb(rgb), .background(background));
+	block_controller sc(.fastClk(ClkPort), .clk(move_clk), .bright(bright), .rst(BtnC),.left(BtnL),.right(BtnR),.hCount(hc), .vCount(vc), .rgb(rgb), .score_ones(score_ones), .score_tens(score_tens), .lives(lives));
 	
 
 
@@ -84,10 +84,11 @@ module vga_top(
 	
 	//SSDs display 
 	//to show how we can interface our "game" module with the SSD's, we output the 12-bit rgb background value to the SSD's
-	assign SSD3 = 4'b0000;
-	assign SSD2 = background[11:8];
-	assign SSD1 = background[7:4];
-	assign SSD0 = background[3:0];
+	assign SSD7 = lives;
+	// assign SSD3 = 4'b0000;
+	// assign SSD2 = background[11:8];
+	assign SSD1 = score_tens;
+	assign SSD0 = score_ones;
 
 
 	// need a scan clk for the seven segment display 
@@ -119,13 +120,12 @@ module vga_top(
 	// Turn off another 4 anodes
 	assign {An7, An6, An5, An4} = 4'b1111;
 	
-	always @ (ssdscan_clk, SSD0, SSD1, SSD2, SSD3)
+	always @ (ssdscan_clk, SSD0, SSD1, SSD7)
 	begin : SSD_SCAN_OUT
 		case (ssdscan_clk) 
 				  2'b00: SSD = SSD0;
 				  2'b01: SSD = SSD1;
-				  2'b10: SSD = SSD2;
-				  2'b11: SSD = SSD3;
+				  2'b10: SSD = SSD7;
 		endcase 
 	end
 
