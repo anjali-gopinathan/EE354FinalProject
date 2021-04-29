@@ -61,17 +61,13 @@ module block_controller(
 	end
 	endgenerate
 
-	integer test = 0;
-
 	/*when outputting the rgb value in an always block like this, make sure to include the if(~bright) statement, as this ensures the monitor 
 	will output some data to every pixel and not just the images you are trying to display*/
 	always@ (*) begin
     	if(~bright )	//force black if not inside the display area
 			rgb = 12'b0000_0000_0000;
-			test = 1;
 		else if (paddle_fill) 
 			rgb = RED;
-			test = 2; 
 		else if (~background_fill)
 		begin
 			// if (hCount < 500)
@@ -84,7 +80,6 @@ module block_controller(
 				begin
 					if(blocks_fill[j][i] == 1)	// hcount and vcount are on top of the block
 					begin
-						test = 3;
 						if(blocks[j][i][0] == 1)// if block has been hit
 						begin
 							//set rgb to background
@@ -138,8 +133,8 @@ module block_controller(
 					blocks[j][i][11:2] <= j*25 + 34;		// y pos
 					if ((i % 2) == 0)
 						begin
-							if ((j % 2) == 0) blocks[j][i][1] <= 1;				// 1 = pink
-							else blocks[j][i][1] <= 0; 							// 0 = blue
+							if ((j % 2) == 0) blocks[j][i][1] <= 0;				// 1 = pink
+							else blocks[j][i][1] <= 1; 							// 0 = blue
 						end
 					else
 						begin
