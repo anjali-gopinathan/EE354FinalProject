@@ -134,6 +134,7 @@ module block_controller(
 	integer ball_x_vel;
 	integer ball_y_vel;
 
+	integer test;
 	always@(posedge clk, posedge rst) 
 	begin
 		if(rst)
@@ -196,18 +197,22 @@ module block_controller(
 			// paddle collision
 			if (collide_paddle(xpos, ypos))
 			begin
+				test = 1;
 				ball_y_vel = -ball_y_vel;		// reverse ball's y velocity
 			end
 			else if (ball_x >= RIGHT_WALL_X || ball_x <= LEFT_WALL_X)		// side wall collision
 			begin
+				 test = 2;
 				ball_x_vel = -ball_x_vel;
 			end
 			else if (ball_y <= CEILING_Y)	// ceiling collision
 			begin
+				test = 3;
 				ball_y_vel = -ball_y_vel;
 			end
 			else if (ball_y >= FLOOR_Y)		// hit floor, bad die
 			begin
+				test = 4;
 				// for now gonna make it bounce, but later decrement lives and stuff
 				ball_y_vel = -ball_y_vel;
 			end
@@ -221,6 +226,7 @@ module block_controller(
 					begin
 						if (collide_block(blocks[j][i][21:12], blocks[j][i][11:2]))
 						begin
+							test = 5;
 							if (~blocks[j][i][0])			// block has not already been hit
 							begin
 								blocks[j][i][0] = 1;		// set block to hit
@@ -258,9 +264,8 @@ module block_controller(
 		input [9:0] paddle_y;
 		begin
 			collide_paddle = 
-				((ball_y - BALL_HEIGHT) <= (paddle_y + PADDLE_HEIGHT)) ||
-				((ball_y + BALL_HEIGHT) >= paddle_y - PADDLE_HEIGHT) ||
-				((ball_x + BALL_WIDTH) >= paddle_x - PADDLE_WIDTH) ||
+				((ball_y + BALL_HEIGHT) >= paddle_y - PADDLE_HEIGHT) &&
+				((ball_x + BALL_WIDTH) >= paddle_x - PADDLE_WIDTH) &&
 				((ball_x - BALL_WIDTH) <= paddle_x + PADDLE_WIDTH);
 		end
 	endfunction
