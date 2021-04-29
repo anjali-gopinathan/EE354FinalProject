@@ -115,10 +115,10 @@ module vga_top(
 	assign ssdscan_clk = DIV_CLK[19:18];
 	assign An0	= !(~(ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 00
 	assign An1	= !(~(ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 01
-	assign An2	=  !((ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 10
-	assign An3	=  !((ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 11
+	assign An7	=  !((ssdscan_clk[1]) && ~(ssdscan_clk[0]));  // when ssdscan_clk = 10
+	//assign An3	=  !((ssdscan_clk[1]) &&  (ssdscan_clk[0]));  // when ssdscan_clk = 11
 	// Turn off another 4 anodes
-	assign {An7, An6, An5, An4} = 4'b1111;
+	assign {An6, An5, An4, An3, An2} = 5'b11111;
 	
 	always @ (ssdscan_clk, SSD0, SSD1, SSD7)
 	begin : SSD_SCAN_OUT

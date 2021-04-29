@@ -110,17 +110,6 @@ module block_controller(
 						begin
 							//set rgb to background
 							rgb=WHITE;
-							score_ones <= score_ones + 1;
-							if(score_ones == 9)
-							begin
-								score_ones <= 0;
-								score_tens <= score_tens + 1;
-								if(score_tens == 9)
-								begin
-									score_tens <= 9;
-									score_ones <= 9;
-								end
-							end
 						end
 						else	//block has not been hit
 						begin
@@ -134,12 +123,12 @@ module block_controller(
 							end
 						end
 					end			
-					else	// background fill (hcount and vcount are below the blocks)
-					begin
-						rgb = WHITE;
-					end
 				end
 			end
+		end
+		else	// background fill (hcount and vcount are below the blocks)
+		begin
+			rgb = WHITE;
 		end
 	end
 	
@@ -151,22 +140,27 @@ module block_controller(
 	integer ball_x_vel;
 	integer ball_y_vel;
 
-	integer test;
+	reg [2:0] state;
+	localparam
+	INIT_0 = 3'b000, INIT_1 = 3'b001, PHASE_1 = 3'b010, PHASE_2 = 3'b011, PHASE_3 = 3'b100, WIN = 3'b101, LOSE = 3'b110;
+
 	always@(posedge clk, posedge rst) 
 	begin
 		if(rst)
 		begin 
+			state <= INIT_0;
+
 			//rough values for center of screen
 			background <= WHITE;
-			score_ones <= 0;
-			score_tens <= 0;
-			lives <= 9;
+			score_ones <= 4'bx;
+			score_tens <= 4'bx;
+			lives <= 4'bx;
 
-			xpos<=450;
-			ypos<=500;
+			xpos <= 450;
+			ypos <= 500;
 
-			ball_x<=450;		//later want to randomize this position
-			ball_y<=480;
+			ball_x <= 9'bx;		//later want to randomize this position
+			ball_y <= 9'bx;
 			
 			for(i = 0; i < 12; i = i + 1)
 			begin			// i represents x pos
@@ -217,22 +211,18 @@ module block_controller(
 			// paddle collision
 			if (collide_paddle(xpos, ypos))
 			begin
-				test = 1;
 				ball_y_vel = -ball_y_vel;		// reverse ball's y velocity
 			end
 			else if (ball_x >= RIGHT_WALL_X || ball_x <= LEFT_WALL_X)		// side wall collision
 			begin
-				 test = 2;
 				ball_x_vel = -ball_x_vel;
 			end
 			else if (ball_y <= CEILING_Y)	// ceiling collision
 			begin
-				test = 3;
 				ball_y_vel = -ball_y_vel;
 			end
 			else if (ball_y >= FLOOR_Y)		// hit floor, bad die
 			begin
-				test = 4;
 				// for now gonna make it bounce, but later decrement lives and stuff
 				ball_y_vel = -ball_y_vel;
 				lives <= lives - 1;
@@ -249,6 +239,21 @@ module block_controller(
 						begin
 							if (~blocks[j][i][0])			// block has not already been hit
 							begin
+								if(score_ones == 9)
+								begin
+									score_ones <= 0;
+									score_tens <= score_tens + 1;
+									if(score_tens == 9)
+									begin
+										score_tens <= 9;
+										score_ones <= 9;
+									end
+								end
+								else
+								begin
+									score_ones <= score_ones + 1;
+								end
+
 								blocks[j][i][0] = 1;		// set block to hit
 								ball_y_vel = -ball_y_vel;	// reverse ball's y velocity
 							end
