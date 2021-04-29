@@ -31,8 +31,9 @@ module block_controller(
 	BLACK		= 12'b0000_0000_0000,
 	PURPLE		= 12'b1000_0010_1111;
 	
+	
 	localparam
-	LEFT_WALL_X = 220,		// supposed to be 144
+	LEFT_WALL_X = 250,		// supposed to be 144
 	RIGHT_WALL_X = 790,		// maybe 783?
 	CEILING_Y = 35,
 	FLOOR_Y = 515,
@@ -172,7 +173,7 @@ module block_controller(
 
 			// initialize ball to go Southeast 
 			ball_x_vel <= 2;
-			ball_y_vel <= 2;
+			ball_y_vel <= -2;
 
 		end
 		else if (clk) begin
@@ -218,27 +219,26 @@ module block_controller(
 			end
 
 			// block collisions
-			else
-			begin
-				for(i = 0; i < 12; i = i + 1)
-				begin
-					for(j = 0; j < 5; j = j + 1)
-					begin
-						if (collide_block(blocks[j][i][21:12], blocks[j][i][11:2]))
-						begin
-							test = 5;
-							if (~blocks[j][i][0])			// block has not already been hit
-							begin
-								blocks[j][i][0] = 1;		// set block to hit
-								ball_y_vel = -ball_y_vel;	// reverse ball's y velocity
-							end
-						end
-					end
-				end
-			end
+			// else
+			// begin
+			// 	for(i = 0; i < 12; i = i + 1)
+			// 	begin
+			// 		for(j = 0; j < 5; j = j + 1)
+			// 		begin
+			// 			if (collide_block(blocks[j][i][21:12], blocks[j][i][11:2]))
+			// 			begin
+			// 				if (~blocks[j][i][0])			// block has not already been hit
+			// 				begin
+			// 					blocks[j][i][0] = 1;		// set block to hit
+			// 					ball_y_vel = -ball_y_vel;	// reverse ball's y velocity
+			// 				end
+			// 			end
+			// 		end
+			// 	end
+			// end
 
-			ball_x <= ball_x + (ball_x_vel);
-			ball_y <= ball_y + (ball_y_vel);
+			ball_x <= ball_x + ball_x_vel;
+			ball_y <= ball_y + ball_y_vel;
 
 		end
 	end
