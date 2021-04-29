@@ -217,8 +217,7 @@ module block_controller(
 				// for now gonna make it bounce, but later decrement lives and stuff
 				ball_y_vel = -ball_y_vel;
 			end
-
-			block collisions
+			// block collisions
 			else
 			begin
 				for(i = 0; i < 12; i = i + 1)
