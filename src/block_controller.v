@@ -4,7 +4,7 @@ module block_controller(
 	input clk, //this clock must be a slow enough clock to view the changing positions of the objects
 	input bright,
 	input rst,
-	input up, input down, input left, input right,
+	input left, input right,
 	input [9:0] hCount, vCount,
 	output reg [11:0] rgb,
 	output reg [11:0] background
@@ -27,7 +27,9 @@ module block_controller(
 	parameter RED   = 12'b1111_0000_0000;
 	parameter WHITE = 12'b1111_1111_1111;
 	parameter PINK  = 12'b1111_0000_1111;
-	parameter BLUE  = 12'b0000_1111_1111;
+	parameter BLUE = 12'b0000_0000_1111;
+	parameter LIGHT_BLUE  = 12'b0000_1111_1111;
+	parameter BRIGHT_GREEN = 12'b0000_1111_0000;
 	
 /**	Fill grid of blocks
 */	
@@ -77,33 +79,37 @@ module block_controller(
 		// 	rgb = PINK;
 		else if (~background_fill)
 		begin
+			// if (hCount < 500)
+			// 	rgb = BLUE;
+			// else
+			// 	rgb = PINK;
 			for(i = 0; i < 5; i = i + 1)
-			begin							
+			begin
 				for( j = 0; j < 12; j = j + 1 )
 				begin
-					if(blocks_fill[i][j] == 1)	//block is in the grid area
-					begin
-						if(blocks[i][j][0] == 1)// if block has been hit
-						begin
-							//set rgb to background
-							rgb=WHITE;
-						end
-						else	//block has not been hit
-						begin
-							if(blocks[i][j][1] == 1)		// alternating block colors
-								rgb=PINK;
-							else
-								rgb=BLUE;
-							
-						end
-					end
-					else	//block is not in grid area
-						rgb=WHITE;
+					// if(blocks_fill[i][j] == 1)	//block is in the grid area
+					// begin
+						// if(blocks[i][j][0] == 1)// if block has been hit
+						// begin
+						// 	//set rgb to background
+						// 	rgb=WHITE;
+						// end
+						// else	//block has not been hit
+						// begin
+						if(blocks[i][j][1] == 1)		// alternating block colors
+							rgb=PINK;
+						else
+							rgb=LIGHT_BLUE;
+						
+						// end
+					// end
+					// else	//block is not in grid area
+					// 	rgb=WHITE;
 				end
 			end
 		end
-		else
-			rgb = WHITE;
+		else	// background fill
+			rgb = BRIGHT_GREEN;
 			
 	end
 		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
@@ -115,7 +121,7 @@ module block_controller(
 		if(rst)
 		begin 
 			//rough values for center of screen
-			background <= 12'b1111_1111_1111;
+			background <= WHITE;
 
 			xpos<=450;
 			ypos<=500;
@@ -133,7 +139,7 @@ module block_controller(
 					if ((i % 2) == 0)
 						begin
 							if ((j % 2) == 0) blocks[i][j][1] <= 1;				// 1 = red
-							else blocks[i][j][1] <= 0; 							// 0 = pink
+							else blocks[i][j][1] <= 0; 							// 0 = light blue
 						end
 					else
 						begin
