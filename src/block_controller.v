@@ -134,10 +134,10 @@ module block_controller(
 							end
 						end
 					end			
-				end
-				else	// background fill (hcount and vcount are below the blocks)
-				begin
-					rgb = WHITE;
+					else	// background fill (hcount and vcount are below the blocks)
+					begin
+						rgb = WHITE;
+					end
 				end
 			end
 		end
