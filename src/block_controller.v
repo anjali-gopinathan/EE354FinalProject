@@ -32,7 +32,7 @@ module block_controller(
 	PURPLE		= 12'b1000_0010_1111;
 	
 	localparam
-	LEFT_WALL_X = 190,		// supposed to be 144
+	LEFT_WALL_X = 220,		// supposed to be 144
 	RIGHT_WALL_X = 790,		// maybe 783?
 	CEILING_Y = 35,
 	FLOOR_Y = 515,
@@ -129,11 +129,7 @@ module block_controller(
 		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
 	assign paddle_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
 	assign background_fill= vCount>=(BOTTOM_OF_GRID_Y);
-<<<<<<< HEAD
-	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-25) && hCount<=(ball_x+25);
-=======
 	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-5) && hCount<=(ball_x+5);
->>>>>>> 5eedb18642b3b4f660fb9048c4e5739a752ed584
 
 	integer ball_x_vel;
 	integer ball_y_vel;
@@ -202,6 +198,20 @@ module block_controller(
 			begin
 				ball_y_vel = -ball_y_vel;		// reverse ball's y velocity
 			end
+			else if (ball_x >= RIGHT_WALL_X || ball_x <= LEFT_WALL_X)		// side wall collision
+			begin
+				ball_x_vel = -ball_x_vel;
+			end
+			else if (ball_y <= CEILING_Y)	// ceiling collision
+			begin
+				ball_y_vel = -ball_y_vel;
+			end
+			else if (ball_y >= FLOOR_Y)		// hit floor, bad die
+			begin
+				// for now gonna make it bounce, but later decrement lives and stuff
+				ball_y_vel = -ball_y_vel;
+			end
+
 			// block collisions
 			else
 			begin
@@ -220,9 +230,10 @@ module block_controller(
 					end
 				end
 
-			ball_x <= ball_x + (ball_x_vel);
-			ball_y <= ball_y + (ball_y_vel);
-			
+				ball_x <= ball_x + (ball_x_vel);
+				ball_y <= ball_y + (ball_y_vel);
+				
+			end
 		end
 	end
 
