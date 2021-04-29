@@ -21,23 +21,25 @@ module block_controller(
 	reg [9:0] xpos, ypos;
 	reg [9:0] ball_x, ball_y;
 	
-	parameter RED   = 12'b1111_0000_0000;
-	parameter WHITE = 12'b1111_1111_1111;
-	parameter PINK  = 12'b1111_0000_1111;
-	parameter BLUE = 12'b0000_0000_1111;
-	parameter LIGHT_BLUE  = 12'b0000_1111_1111;
-	parameter BRIGHT_GREEN = 12'b0000_1111_0000;
-	parameter BLACK = 12'b0000_0000_0000;
-	parameter PURPLE = 12'b1000_0010_1111;
+	localparam
+	RED			= 12'b1111_0000_0000,
+	WHITE		= 12'b1111_1111_1111,
+	PINK		= 12'b1111_0000_1111,
+	BLUE		= 12'b0000_0000_1111,
+	LIGHT_BLUE	= 12'b0000_1111_1111,
+	BRIGHT_GREEN= 12'b0000_1111_0000,
+	BLACK		= 12'b0000_0000_0000,
+	PURPLE		= 12'b1000_0010_1111;
 	
+	localparam
+	LEFT_WALL_X = 144,
+	RIGHT_WALL_X = 783,
+	CEILING_Y = 35,
+	FLOOR_Y = 515,
+	BOTTOM_OF_GRID_Y = 160;
 
-	parameter LEFT_WALL_X = 144;
-	parameter RIGHT_WALL_X = 783;
-	parameter CEILING_Y = 35;
-	parameter FLOOR_Y = 515;
-
-	parameter BLOCK_WIDTH = 53;
-	parameter BLOCK_HEIGHT = 25;
+	integer BLOCK_WIDTH = (RIGHT_WALL_X - LEFT_WALL_X) / 12;		// 53 ish
+	integer BLOCK_HEIGHT = (BOTTOM_OF_GRID_Y - CEILING_Y) / 5;
 /**	Fill grid of blocks
 */	
 	// reg [60:0] blocks;
@@ -136,7 +138,7 @@ module block_controller(
 	end
 		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
 	assign paddle_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
-	assign background_fill= vCount>=(159);
+	assign background_fill= vCount>=(BOTTOM_OF_GRID_Y);
 	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-25) && hCount<=(ball_x+25)
 
 	reg ball_x_vel;
