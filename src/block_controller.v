@@ -36,7 +36,11 @@ module block_controller(
 	RIGHT_WALL_X = 783,
 	CEILING_Y = 35,
 	FLOOR_Y = 515,
-	BOTTOM_OF_GRID_Y = 160;
+	BOTTOM_OF_GRID_Y = 160,
+	BALL_WIDTH = 5,
+	BALL_HEIGHT = 5,
+	PADDLE_WIDTH = 25,
+	PADDLE_HEIGHT = 5;
 
 	integer BLOCK_WIDTH = (RIGHT_WALL_X - LEFT_WALL_X) / 12;		// 53 ish
 	integer BLOCK_HEIGHT = (BOTTOM_OF_GRID_Y - CEILING_Y) / 5;
@@ -125,7 +129,7 @@ module block_controller(
 		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
 	assign paddle_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
 	assign background_fill= vCount>=(BOTTOM_OF_GRID_Y);
-	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-25) && hCount<=(ball_x+25)
+	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-25) && hCount<=(ball_x+25);
 
 	reg ball_x_vel;
 	reg ball_y_vel;
@@ -189,6 +193,29 @@ module block_controller(
 					xpos<=150;		// if wrapping, set xpos to 800
 			end
 
+			// paddle collision
+			if (collide_paddle(x_pos, y_pos))
+			begin
+				ball_y_vel = -ball_y_vel;		// reverse ball's y velocity
+			end
+			// block collisions
+			else
+			begin
+				for(i = 0; i < 12; i = i + 1)
+				begin
+					for(j = 0; j < 5; j = j + 1)
+					begin
+						if (collide_block(blocks[j][i][21:12], blocks[j][i][11:2]))
+						begin
+							if (~blocks[j][i][0])			// block has not already been hit
+							begin
+								blocks[j][i][0] = 1;		// set block to hit
+								ball_y_vel = -ball_y_vel;	// reverse ball's y velocity
+							end
+						end
+					end
+				end
+
 			ball_x <= ball_x + (ball_x_vel);
 			ball_y <= ball_y + (ball_y_vel);
 			// else if(up) begin
@@ -203,6 +230,34 @@ module block_controller(
 			// end
 		end
 	end
+
+	// ball collision functions
+
+	function collide_block;
+		input [9:0] block_x;
+		input [9:0] block_y;
+		begin
+			collide_block = 
+				((ball_y - BALL_HEIGHT) <= (block_y + BLOCK_HEIGHT)) ||
+				((ball_y + BALL_HEIGHT) >= block_y) ||
+				((ball_x + BALL_WIDTH) >= block_x) ||
+				((ball_x - BALL_WIDTH) <= block_x + BLOCK_WIDTH);
+		end
+	endfunction
+
+	// x_pos and y_pos are global variables for paddle position,
+	// but we need to pass them in anyways because functions require inputs
+	function collide_paddle;
+		input [9:0] paddle_x;
+		input [9:0] paddle_y;
+		begin
+			collide_paddle = 
+				((ball_y - BALL_HEIGHT) <= (paddle_y + PADDLE_HEIGHT)) ||
+				((ball_y + BALL_HEIGHT) >= paddle_y - PADDLE_HEIGHT) ||
+				((ball_x + BALL_WIDTH) >= paddle_x - PADDLE_WIDTH) ||
+				((ball_x - BALL_WIDTH) <= paddle_x + PADDLE_WIDTH);
+		end
+	endfunction
 	
 	//the background color reflects the most recent button press
 	// always@(posedge clk, posedge rst) begin
