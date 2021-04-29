@@ -218,24 +218,24 @@ module block_controller(
 				ball_y_vel = -ball_y_vel;
 			end
 
-			// block collisions
-			// else
-			// begin
-			// 	for(i = 0; i < 12; i = i + 1)
-			// 	begin
-			// 		for(j = 0; j < 5; j = j + 1)
-			// 		begin
-			// 			if (collide_block(blocks[j][i][21:12], blocks[j][i][11:2]))
-			// 			begin
-			// 				if (~blocks[j][i][0])			// block has not already been hit
-			// 				begin
-			// 					blocks[j][i][0] = 1;		// set block to hit
-			// 					ball_y_vel = -ball_y_vel;	// reverse ball's y velocity
-			// 				end
-			// 			end
-			// 		end
-			// 	end
-			// end
+			block collisions
+			else
+			begin
+				for(i = 0; i < 12; i = i + 1)
+				begin
+					for(j = 0; j < 5; j = j + 1)
+					begin
+						if (collide_block(blocks[j][i][21:12], blocks[j][i][11:2]))
+						begin
+							if (~blocks[j][i][0])			// block has not already been hit
+							begin
+								blocks[j][i][0] = 1;		// set block to hit
+								ball_y_vel = -ball_y_vel;	// reverse ball's y velocity
+							end
+						end
+					end
+				end
+			end
 
 			ball_x <= ball_x + ball_x_vel;
 			ball_y <= ball_y + ball_y_vel;
@@ -250,9 +250,9 @@ module block_controller(
 		input [9:0] block_y;
 		begin
 			collide_block = 
-				((ball_y - BALL_HEIGHT) <= (block_y + BLOCK_HEIGHT)) ||
-				((ball_y + BALL_HEIGHT) >= block_y) ||
-				((ball_x + BALL_WIDTH) >= block_x) ||
+				((ball_y - BALL_HEIGHT) <= (block_y + BLOCK_HEIGHT)) &&
+				((ball_y + BALL_HEIGHT) >= block_y) &&
+				((ball_x + BALL_WIDTH) >= block_x) &&
 				((ball_x - BALL_WIDTH) <= block_x + BLOCK_WIDTH);
 		end
 	endfunction
