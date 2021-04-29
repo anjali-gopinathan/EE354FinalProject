@@ -1,6 +1,7 @@
 `timescale 1ns / 1ps
 
 module block_controller(
+	input fastClk,
 	input clk, //this clock must be a slow enough clock to view the changing positions of the objects
 	input bright,
 	input rst,
@@ -51,7 +52,7 @@ module block_controller(
 		begin		// j represents y pos	
 			// parameter x_pos = block_i*53 + 144;
 			// parameter y_pos = block_j*25 + 34;		
-			assign blocks_fill[block_i][block_j] = 
+			assign blocks_fill[block_j][block_i] = 
 				(vCount >= (block_j*25 + 34)) &&		// top
 				(vCount <= (block_j*25 + 59)) &&		// bottom
 				(hCount >= (block_i*53 + 144)) &&		// left
@@ -60,16 +61,17 @@ module block_controller(
 	end
 	endgenerate
 
+	integer test = 0;
+
 	/*when outputting the rgb value in an always block like this, make sure to include the if(~bright) statement, as this ensures the monitor 
 	will output some data to every pixel and not just the images you are trying to display*/
 	always@ (*) begin
     	if(~bright )	//force black if not inside the display area
 			rgb = 12'b0000_0000_0000;
+			test = 1;
 		else if (paddle_fill) 
-			rgb = RED; 
-
-		// else if (blocks)
-		// 	rgb = PINK;
+			rgb = RED;
+			test = 2; 
 		else if (~background_fill)
 		begin
 			// if (hCount < 500)
@@ -80,16 +82,17 @@ module block_controller(
 			begin
 				for( j = 0; j < 5; j = j + 1 )
 				begin
-					if(blocks_fill[i][j] == 1)	// hscan and vscan are on top of the block
+					if(blocks_fill[j][i] == 1)	// hcount and vcount are on top of the block
 					begin
-						if(blocks[i][j][0] == 1)// if block has been hit
+						test = 3;
+						if(blocks[j][i][0] == 1)// if block has been hit
 						begin
 							//set rgb to background
 							rgb=WHITE;
 						end
 						else	//block has not been hit
 						begin
-							if(blocks[i][j][1] == 1)		// alternating block colors
+							if(blocks[j][i][1] == 1)		// alternating block colors
 							begin
 								rgb=PINK;
 							end
@@ -99,14 +102,15 @@ module block_controller(
 							end
 						end
 					end
-					else	//block is not in grid area
-					begin
-						rgb=WHITE;
-					end
+					// else	
+					// begin
+					// 	rgb=WHITE;
+					// 	test = 4;
+					// end
 				end
 			end
 		end
-		else	// background fill
+		else	// background fill (hcount and vcount are below the blocks)
 			rgb = BRIGHT_GREEN;
 			
 	end
@@ -130,19 +134,19 @@ module block_controller(
 				begin: block_init		// j represents y pos			
 					// parameter x_pos = block_i*53 + 144;
 					// parameter y_pos = block_j*25 + 34;						
-					blocks[i][j][21:12] <= i*53 + 144;		// x pos
-					blocks[i][j][11:2] <= j*25 + 34;		// y pos
+					blocks[j][i][21:12] <= i*53 + 144;		// x pos
+					blocks[j][i][11:2] <= j*25 + 34;		// y pos
 					if ((i % 2) == 0)
 						begin
-							if ((j % 2) == 0) blocks[i][j][1] <= 1;				// 1 = pink
-							else blocks[i][j][1] <= 0; 							// 0 = blue
+							if ((j % 2) == 0) blocks[j][i][1] <= 1;				// 1 = pink
+							else blocks[j][i][1] <= 0; 							// 0 = blue
 						end
 					else
 						begin
-							if ((j % 2) == 0) blocks[i][j][1] <= 1;
-							else blocks[i][j][1] <= 0;
+							if ((j % 2) == 0) blocks[j][i][1] <= 1;
+							else blocks[j][i][1] <= 0;
 						end
-					blocks[i][j][0] <= 0;		// initialize block to state of being not hit
+					blocks[j][i][0] <= 0;		// initialize block to state of being not hit
 				end
 			end
 
