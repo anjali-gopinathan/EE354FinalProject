@@ -32,8 +32,8 @@ module block_controller(
 	PURPLE		= 12'b1000_0010_1111;
 	
 	localparam
-	LEFT_WALL_X = 144,
-	RIGHT_WALL_X = 783,
+	LEFT_WALL_X = 190,		// supposed to be 144
+	RIGHT_WALL_X = 790,		// maybe 783?
 	CEILING_Y = 35,
 	FLOOR_Y = 515,
 	BOTTOM_OF_GRID_Y = 160,
@@ -43,7 +43,7 @@ module block_controller(
 	PADDLE_HEIGHT = 5;
 
 	integer BLOCK_WIDTH = (RIGHT_WALL_X - LEFT_WALL_X) / 12;		// 53 ish
-	integer BLOCK_HEIGHT = (BOTTOM_OF_GRID_Y - CEILING_Y) / 5;
+	integer BLOCK_HEIGHT = (BOTTOM_OF_GRID_Y - CEILING_Y) / 5;		// 25 ish
 /**	Fill grid of blocks
 */	
 	// reg [60:0] blocks;
@@ -129,10 +129,14 @@ module block_controller(
 		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
 	assign paddle_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
 	assign background_fill= vCount>=(BOTTOM_OF_GRID_Y);
+<<<<<<< HEAD
 	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-25) && hCount<=(ball_x+25);
+=======
+	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-5) && hCount<=(ball_x+5);
+>>>>>>> 5eedb18642b3b4f660fb9048c4e5739a752ed584
 
-	reg ball_x_vel;
-	reg ball_y_vel;
+	integer ball_x_vel;
+	integer ball_y_vel;
 
 	always@(posedge clk, posedge rst) 
 	begin
@@ -153,8 +157,8 @@ module block_controller(
 				begin: block_init		// j represents y pos			
 					// parameter x_pos = block_i*53 + 144;
 					// parameter y_pos = block_j*25 + 34;						
-					blocks[j][i][21:12] <= i*53 + 144;		// x pos
-					blocks[j][i][11:2] <= j*25 + 34;		// y pos
+					blocks[j][i][21:12] <= i*BLOCK_WIDTH + LEFT_WALL_X;		// x pos
+					blocks[j][i][11:2] <= j*BLOCK_HEIGHT + CEILING_Y;		// y pos
 					if ((i % 2) == 0)
 						begin
 							if ((j % 2) == 0) blocks[j][i][1] <= 0;				// 1 = pink
@@ -184,13 +188,13 @@ module block_controller(
 		*/
 			if(right) begin
 				xpos<=xpos+2; //change the amount you increment to make the speed faster 
-				if(xpos==800) //these are rough values to attempt looping around, you can fine-tune them to make it more accurate- refer to the block comment above
-					xpos<=800;		// if wrapping, set to 150
+				if(xpos==RIGHT_WALL_X) //these are rough values to attempt looping around, you can fine-tune them to make it more accurate- refer to the block comment above
+					xpos<=RIGHT_WALL_X;		// if wrapping, set to 150
 			end
 			else if(left) begin
 				xpos<=xpos-2;
-				if(xpos==150)
-					xpos<=150;		// if wrapping, set xpos to 800
+				if(xpos==LEFT_WALL_X)
+					xpos<=LEFT_WALL_X;		// if wrapping, set xpos to 800
 			end
 
 			// paddle collision
@@ -218,16 +222,7 @@ module block_controller(
 
 			ball_x <= ball_x + (ball_x_vel);
 			ball_y <= ball_y + (ball_y_vel);
-			// else if(up) begin
-			// 	ypos<=ypos-2;
-			// 	if(ypos==34)
-			// 		ypos<=514;
-			// end
-			// else if(down) begin
-			// 	ypos<=ypos+2;
-			// 	if(ypos==514)
-			// 		ypos<=34;
-			// end
+			
 		end
 	end
 
