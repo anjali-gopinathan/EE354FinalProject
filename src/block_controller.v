@@ -5,6 +5,7 @@ module block_controller(
 	input clk, //this clock must be a slow enough clock to view the changing positions of the objects
 	input bright,
 	input rst,
+	input start,
 	input left, input right,
 	input [9:0] hCount, vCount,
 	output reg [11:0] rgb,
@@ -137,9 +138,11 @@ module block_controller(
 	assign background_fill= vCount>=(BOTTOM_OF_GRID_Y);
 	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-5) && hCount<=(ball_x+5);
 
-	integer ball_x_vel;
-	integer ball_y_vel;
+	integer ball_x_direction;
+	integer ball_y_direction;
+	integer ball_speed;
 
+	reg [1:0] flag;
 	reg [2:0] state;
 	localparam
 	INIT_0 = 3'b000, INIT_1 = 3'b001, PHASE_1 = 3'b010, PHASE_2 = 3'b011, PHASE_3 = 3'b100, WIN = 3'b101, LOSE = 3'b110;
@@ -161,6 +164,8 @@ module block_controller(
 
 			ball_x <= 9'bx;		//later want to randomize this position
 			ball_y <= 9'bx;
+
+			flag <= 2'bx;
 			
 			for(i = 0; i < 12; i = i + 1)
 			begin			// i represents x pos
@@ -184,12 +189,90 @@ module block_controller(
 				end
 			end
 
-			// initialize ball to go Southeast 
-			ball_x_vel <= 2;
-			ball_y_vel <= 2;
-
 		end
 		else if (clk) begin
+
+			case(state)
+				INIT_0:
+				begin
+					// data transitions
+					score_ones <= 0;
+					score_tens <= 0;
+					lives <= 3;
+					ball_speed <= 0;
+					// init direction to southeast (down to the right)
+					ball_x_direction <= 1;
+					ball_y_direction <= 1;
+					ball_x <= 480;
+					ball_y <= 200;
+
+					// data transitions
+					if (start)
+						state <= PHASE_1;
+				end
+
+				PHASE_1:
+				begin
+					// data transitions
+					ball_speed <= 1;
+					flag <= 0;
+					if (ball_y >= FLOOR_Y)
+						lives <= lives - 1;
+					do_block_collisions();
+
+					// state transitions
+					if (score_tens == 2)
+						state <= PHASE_2;
+					if (ball_y >= FLOOR_Y)
+						state <= INIT_2;
+					if (lives == 0)
+						state <= LOSE;
+				end
+
+				PHASE_2:
+				begin
+					// data transitions
+					ball_speed <= 2;
+					flag <= 1;
+					if (ball_y >= FLOOR_Y)
+						lives <= lives - 1;
+					do_block_collisions();
+
+					// state transitions
+					if (score_tens == 4)
+						state <= PHASE_3;
+					if (ball_y >= FLOOR_Y)
+						state <= INIT_2;
+					if (lives == 0)
+						state <= LOSE;
+				end
+
+				PHASE_3:
+				begin
+					// data transitions
+					ball_speed <= 3;
+					flag <= 1;
+					if (ball_y >= FLOOR_Y)
+						lives <= lives - 1;
+					do_block_collisions();
+
+					// state transitions
+					if (score_tens == 6)
+						state <= WIN;
+					if (ball_y >= FLOOR_Y)
+						state <= INIT_2;
+					if (lives == 0)
+						state <= LOSE;
+				end
+
+				INIT_1:
+				begin
+					// data transitions
+					ball_speed <= 0;
+					
+				end
+		
+			endcase
 			
 		/* Note that the top left of the screen does NOT correlate to vCount=0 and hCount=0. The display_controller.v file has the 
 			synchronizing pulses for both the horizontal sync and the vertical sync begin at vcount=0 and hcount=0. Recall that after 
@@ -211,23 +294,17 @@ module block_controller(
 			// paddle collision
 			if (collide_paddle(xpos, ypos))
 			begin
-				ball_y_vel = -ball_y_vel;		// reverse ball's y velocity
+				ball_y_direction = -ball_y_direction;						// reverse ball's y direction
 			end
 			else if (ball_x >= RIGHT_WALL_X || ball_x <= LEFT_WALL_X)		// side wall collision
 			begin
-				ball_x_vel = -ball_x_vel;
+				ball_x_direction = -ball_x_direction;
 			end
-			else if (ball_y <= CEILING_Y)	// ceiling collision
+			else if (ball_y <= CEILING_Y)									// ceiling collision
 			begin
-				ball_y_vel = -ball_y_vel;
+				ball_y_direction = -ball_y_direction;
 			end
-			else if (ball_y >= FLOOR_Y)		// hit floor, bad die
-			begin
-				// for now gonna make it bounce, but later decrement lives and stuff
-				ball_y_vel = -ball_y_vel;
-				lives <= lives - 1;
 
-			end
 			// block collisions
 			else
 			begin
@@ -254,21 +331,56 @@ module block_controller(
 									score_ones <= score_ones + 1;
 								end
 
-								blocks[j][i][0] = 1;		// set block to hit
-								ball_y_vel = -ball_y_vel;	// reverse ball's y velocity
+								blocks[j][i][0] = 1;					// set block to hit
+								ball_y_direction = -ball_y_direction;	// reverse ball's y direction
 							end
 						end
 					end
 				end
 			end
 
-			ball_x <= ball_x + ball_x_vel;
-			ball_y <= ball_y + ball_y_vel;
+			ball_x <= ball_x + ball_x_direction*ball_speed;
+			ball_y <= ball_y + ball_y_direction*ball_speed;
 
 		end
 	end
 
 	// ball collision functions
+
+	task do_block_collisions;
+	begin
+		for(i = 0; i < 12; i = i + 1)
+				begin
+					for(j = 0; j < 5; j = j + 1)
+					begin
+						if (collide_block(blocks[j][i][21:12], blocks[j][i][11:2]))
+						begin
+							if (~blocks[j][i][0])			// block has not already been hit
+							begin
+								if(score_ones == 9)
+								begin
+									score_ones <= 0;
+									score_tens <= score_tens + 1;
+									if(score_tens == 9)
+									begin
+										score_tens <= 9;
+										score_ones <= 9;
+									end
+								end
+								else
+								begin
+									score_ones <= score_ones + 1;
+								end
+
+								blocks[j][i][0] = 1;					// set block to hit
+								ball_y_direction = -ball_y_direction;	// reverse ball's y direction
+							end
+						end
+					end
+				end
+	end
+	endtask
+
 
 	function collide_block;
 		input [9:0] block_x;

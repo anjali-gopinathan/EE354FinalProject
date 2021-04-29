@@ -65,7 +65,7 @@ module vga_top(
 	assign move_clk=DIV_CLK[19]; //slower clock to drive the movement of objects on the vga screen
 	wire [11:0] background;
 	display_controller dc(.clk(ClkPort), .hSync(hSync), .vSync(vSync), .bright(bright), .hCount(hc), .vCount(vc));
-	block_controller sc(.fastClk(ClkPort), .clk(move_clk), .bright(bright), .rst(BtnC),.left(BtnL),.right(BtnR),.hCount(hc), .vCount(vc), .rgb(rgb), .score_ones(score_ones), .score_tens(score_tens), .lives(lives));
+	block_controller sc(.fastClk(ClkPort), .clk(move_clk), .bright(bright), .rst(BtnC), .start(BtnU), .left(BtnL),.right(BtnR),.hCount(hc), .vCount(vc), .rgb(rgb), .score_ones(score_ones), .score_tens(score_tens), .lives(lives));
 	
 
 
