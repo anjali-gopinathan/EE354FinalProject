@@ -119,8 +119,8 @@ module block_controller(
 								begin
 									score_tens <= 9;
 									score_ones <= 9;
+								end
 							end
-
 						end
 						else	//block has not been hit
 						begin
@@ -133,13 +133,14 @@ module block_controller(
 								rgb=BLUE;
 							end
 						end
-					end
+					end			
+				end
+				else	// background fill (hcount and vcount are below the blocks)
+				begin
+					rgb = WHITE;
 				end
 			end
 		end
-		else	// background fill (hcount and vcount are below the blocks)
-			rgb = WHITE;
-			
 	end
 		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
 	assign paddle_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
