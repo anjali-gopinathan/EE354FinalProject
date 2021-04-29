@@ -155,9 +155,12 @@ module block_controller(
 
 			//rough values for center of screen
 			background <= WHITE;
-			score_ones <= 4'bx;
-			score_tens <= 4'bx;
-			lives <= 4'bx;
+			// score_ones <= 4'bx;
+			// score_tens <= 4'bx;
+			// lives <= 4'bx;
+			score_ones <= 0;
+			score_tens <= 0;
+			lives <= 9;
 
 			xpos <= 450;
 			ypos <= 500;
