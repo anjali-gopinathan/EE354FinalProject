@@ -74,7 +74,7 @@ module block_controller(
 			begin							
 				for( j = 0; j < 12; j = j + 1 )
 				begin
-					if(blocks_fill[i][j] == 1)	//block is in the grid area
+					if(blocks_fill[i][j] == 1)	// hscan and vscan are on top of the block
 					begin
 						if(blocks[i][j][0] == 1)// if block has been hit
 						begin
@@ -84,13 +84,19 @@ module block_controller(
 						else	//block has not been hit
 						begin
 							if(blocks[i][j][1] == 1)		// alternating block colors
+							begin
 								rgb=PINK;
+							end
 							else
+							begin
 								rgb=BLUE;
+							end
 						end
 					end
 					else	//block is not in grid area
+					begin
 						rgb=WHITE;
+					end
 				end
 			end
 		end
@@ -122,8 +128,8 @@ module block_controller(
 					blocks[i][j][11:2] <= j*25 + 34;		// y pos
 					if ((i % 2) == 0)
 						begin
-							if ((j % 2) == 0) blocks[i][j][1] <= 1;				// 1 = red
-							else blocks[i][j][1] <= 0; 							// 0 = pink
+							if ((j % 2) == 0) blocks[i][j][1] <= 1;				// 1 = pink
+							else blocks[i][j][1] <= 0; 							// 0 = blue
 						end
 					else
 						begin
