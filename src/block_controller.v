@@ -60,6 +60,17 @@ module block_controller(
 	reg [21:0] blocks [0:4][0:11];
 	wire blocks_fill [0:4][0:11];
 
+	integer ball_x_direction;
+	integer ball_y_direction;
+	integer ball_speed;
+
+	reg [1:0] flag;
+	reg [2:0] state;
+	localparam
+	INIT_0 = 3'b000, INIT_1 = 3'b001, PHASE_1 = 3'b010, PHASE_2 = 3'b011, PHASE_3 = 3'b100, WIN = 3'b101, LOSE = 3'b110;
+
+
+
 	// each block will be 53 wide, 12 blocks wide, 0px in between each block
 	// 25 pixels tall, 5 rows, 0 px in between
 	// entire vga monitor pixels:
@@ -97,7 +108,7 @@ module block_controller(
 		end
 		else if (state == WIN)
 		begin
-			rgb = GREEN;
+			rgb = BRIGHT_GREEN;
 		end
 		else if (paddle_fill) 
 		begin
@@ -146,14 +157,6 @@ module block_controller(
 	assign background_fill= vCount>=(BOTTOM_OF_GRID_Y);
 	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-5) && hCount<=(ball_x+5);
 
-	integer ball_x_direction;
-	integer ball_y_direction;
-	integer ball_speed;
-
-	reg [1:0] flag;
-	reg [2:0] state;
-	localparam
-	INIT_0 = 3'b000, INIT_1 = 3'b001, PHASE_1 = 3'b010, PHASE_2 = 3'b011, PHASE_3 = 3'b100, WIN = 3'b101, LOSE = 3'b110;
 
 	always@(posedge clk, posedge rst) 
 	begin
@@ -235,7 +238,7 @@ module block_controller(
 					if (score_tens == 2)
 						state <= PHASE_2;
 					if (ball_y >= FLOOR_Y)
-						state <= INIT_2;
+						state <= INIT_1;
 					if (lives == 0)
 						state <= LOSE;
 				end
@@ -253,7 +256,7 @@ module block_controller(
 					if (score_tens == 4)
 						state <= PHASE_3;
 					if (ball_y >= FLOOR_Y)
-						state <= INIT_2;
+						state <= INIT_1;
 					if (lives == 0)
 						state <= LOSE;
 				end
@@ -271,7 +274,7 @@ module block_controller(
 					if (score_tens == 6)
 						state <= WIN;
 					if (ball_y >= FLOOR_Y)
-						state <= INIT_2;
+						state <= INIT_1;
 					if (lives == 0)
 						state <= LOSE;
 				end
