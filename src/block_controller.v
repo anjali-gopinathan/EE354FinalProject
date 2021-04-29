@@ -12,12 +12,14 @@ module block_controller(
    );
 	wire paddle_fill;
 	wire background_fill;
+	wire ball_fill;
 
 	integer i;
 	integer j;
 	
 	//these two values dictate the center of the block, incrementing and decrementing them leads the block to move in certain directions
 	reg [9:0] xpos, ypos;
+	reg [9:0] ball_x, ball_y;
 	
 	parameter RED   = 12'b1111_0000_0000;
 	parameter WHITE = 12'b1111_1111_1111;
@@ -25,7 +27,17 @@ module block_controller(
 	parameter BLUE = 12'b0000_0000_1111;
 	parameter LIGHT_BLUE  = 12'b0000_1111_1111;
 	parameter BRIGHT_GREEN = 12'b0000_1111_0000;
+	parameter BLACK = 12'b0000_0000_0000;
+	parameter PURPLE = 12'b1000_0010_1111;
 	
+
+	parameter LEFT_WALL_X = 144;
+	parameter RIGHT_WALL_X = 783;
+	parameter CEILING_Y = 35;
+	parameter FLOOR_Y = 515;
+
+	parameter BLOCK_WIDTH = 53;
+	parameter BLOCK_HEIGHT = 25;
 /**	Fill grid of blocks
 */	
 	// reg [60:0] blocks;
@@ -53,10 +65,10 @@ module block_controller(
 			// parameter x_pos = block_i*53 + 144;
 			// parameter y_pos = block_j*25 + 34;		
 			assign blocks_fill[block_j][block_i] = 
-				(vCount >= (block_j*25 + 34)) &&		// top
-				(vCount <= (block_j*25 + 59)) &&		// bottom
-				(hCount >= (block_i*53 + 144)) &&		// left
-				(hCount <= (block_i*53 + 197));			// right
+				(vCount >= ((block_j*BLOCK_HEIGHT) + CEILING_Y)) &&		// top
+				(vCount <= ((block_j*BLOCK_HEIGHT) + CEILING_Y + BLOCK_HEIGHT)) &&		// bottom
+				(hCount >= ((block_i* BLOCK_WIDTH) + LEFT_WALL_X)) &&		// left
+				(hCount <= ((block_i* BLOCK_WIDTH) + LEFT_WALL_X + BLOCK_WIDTH));			// right
 		end
 	end
 	endgenerate
@@ -67,11 +79,19 @@ module block_controller(
 	will output some data to every pixel and not just the images you are trying to display*/
 	always@ (*) begin
     	if(~bright )	//force black if not inside the display area
+		begin
 			rgb = 12'b0000_0000_0000;
 			test = 1;
+		end
 		else if (paddle_fill) 
+		begin
 			rgb = RED;
 			test = 2; 
+		end
+		else if (ball_fill)
+		begin
+			rgb = PURPLE;
+		end
 		else if (~background_fill)
 		begin
 			// if (hCount < 500)
@@ -117,6 +137,10 @@ module block_controller(
 		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
 	assign paddle_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
 	assign background_fill= vCount>=(159);
+	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-25) && hCount<=(ball_x+25)
+
+	reg ball_x_vel;
+	reg ball_y_vel;
 
 	always@(posedge clk, posedge rst) 
 	begin
@@ -127,6 +151,9 @@ module block_controller(
 
 			xpos<=450;
 			ypos<=500;
+
+			ball_x<=450;		//later want to randomize this position
+			ball_y<=480;
 			
 			for(i = 0; i < 12; i = i + 1)
 			begin			// i represents x pos
@@ -138,8 +165,8 @@ module block_controller(
 					blocks[j][i][11:2] <= j*25 + 34;		// y pos
 					if ((i % 2) == 0)
 						begin
-							if ((j % 2) == 0) blocks[j][i][1] <= 1;				// 1 = pink
-							else blocks[j][i][1] <= 0; 							// 0 = blue
+							if ((j % 2) == 0) blocks[j][i][1] <= 0;				// 1 = pink
+							else blocks[j][i][1] <= 1; 							// 0 = blue
 						end
 					else
 						begin
@@ -150,11 +177,13 @@ module block_controller(
 				end
 			end
 
-
+			// initialize ball to go Southeast 
+			ball_x_vel <= 2;
+			ball_y_vel <= 2;
 
 		end
 		else if (clk) begin
-		
+			
 		/* Note that the top left of the screen does NOT correlate to vCount=0 and hCount=0. The display_controller.v file has the 
 			synchronizing pulses for both the horizontal sync and the vertical sync begin at vcount=0 and hcount=0. Recall that after 
 			the length of the pulse, there is also a short period called the back porch before the display area begins. So effectively, 
@@ -171,6 +200,9 @@ module block_controller(
 				if(xpos==150)
 					xpos<=150;		// if wrapping, set xpos to 800
 			end
+
+			ball_x <= ball_x + (ball_x_vel);
+			ball_y <= ball_y + (ball_y_vel);
 			// else if(up) begin
 			// 	ypos<=ypos-2;
 			// 	if(ypos==34)
