@@ -4,7 +4,7 @@ module block_controller(
 	input clk, //this clock must be a slow enough clock to view the changing positions of the objects
 	input bright,
 	input rst,
-	input up, input down, input left, input right,
+	input left, input right,
 	input [9:0] hCount, vCount,
 	output reg [11:0] rgb,
 	output reg [11:0] background
@@ -21,7 +21,9 @@ module block_controller(
 	parameter RED   = 12'b1111_0000_0000;
 	parameter WHITE = 12'b1111_1111_1111;
 	parameter PINK  = 12'b1111_0000_1111;
-	parameter BLUE  = 12'b0000_1111_1111;
+	parameter BLUE = 12'b0000_0000_1111;
+	parameter LIGHT_BLUE  = 12'b0000_1111_1111;
+	parameter BRIGHT_GREEN = 12'b0000_1111_0000;
 	
 /**	Fill grid of blocks
 */	
@@ -43,9 +45,9 @@ module block_controller(
 	genvar block_i;
 	genvar block_j;
 	generate
-	for(block_i = 0; block_i < 5; block_i = block_i + 1)
+	for(block_i = 0; block_i < 12; block_i = block_i + 1)
 	begin			// i represents x pos
-		for( block_j = 0; block_j < 12; block_j = block_j + 1)
+		for( block_j = 0; block_j < 5; block_j = block_j + 1)
 		begin		// j represents y pos	
 			// parameter x_pos = block_i*53 + 144;
 			// parameter y_pos = block_j*25 + 34;		
@@ -70,9 +72,13 @@ module block_controller(
 		// 	rgb = PINK;
 		else if (~background_fill)
 		begin
-			for(i = 0; i < 5; i = i + 1)
-			begin							
-				for( j = 0; j < 12; j = j + 1 )
+			// if (hCount < 500)
+			// 	rgb = BLUE;
+			// else
+			// 	rgb = PINK;
+			for(i = 0; i < 12; i = i + 1)
+			begin
+				for( j = 0; j < 5; j = j + 1 )
 				begin
 					if(blocks_fill[i][j] == 1)	// hscan and vscan are on top of the block
 					begin
@@ -100,8 +106,8 @@ module block_controller(
 				end
 			end
 		end
-		else
-			rgb = WHITE;
+		else	// background fill
+			rgb = BRIGHT_GREEN;
 			
 	end
 		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
@@ -113,14 +119,14 @@ module block_controller(
 		if(rst)
 		begin 
 			//rough values for center of screen
-			background <= 12'b1111_1111_1111;
+			background <= WHITE;
 
 			xpos<=450;
 			ypos<=500;
 			
-			for(i = 0; i < 5; i = i + 1)
+			for(i = 0; i < 12; i = i + 1)
 			begin			// i represents x pos
-				for( j = 0; j < 12; j = j + 1 )
+				for( j = 0; j < 5; j = j + 1 )
 				begin: block_init		// j represents y pos			
 					// parameter x_pos = block_i*53 + 144;
 					// parameter y_pos = block_j*25 + 34;						
