@@ -141,7 +141,8 @@ module block_controller(
 			rgb = WHITE;
 			
 	end
-		//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
+	
+	//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
 	assign paddle_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
 	assign background_fill= vCount>=(BOTTOM_OF_GRID_Y);
 	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-5) && hCount<=(ball_x+5);
@@ -287,22 +288,6 @@ module block_controller(
 				((ball_x - BALL_WIDTH) <= paddle_x + PADDLE_WIDTH);
 		end
 	endfunction
-	
-	//the background color reflects the most recent button press
-	// always@(posedge clk, posedge rst) begin
-	// 	// if(rst)
-	// 	background <= 12'b1111_1111_1111;
-	// 	// else 
-	// 	// 	if(right)
-	// 	// 		background <= 12'b1111_1111_0000;		// yellow orange ish
-	// 	// 	else if(left)
-	// 	// 		background <= 12'b0000_1111_1111;		// light blue
-	// 	// 	else if(down)
-	// 	// 		background <= 12'b0000_1111_0000;		// bright green
-	// 	// 	else if(up)
-	// 	// 		background <= 12'b0000_0000_1111;		// royal blue
-	// end
-
 	
 	
 endmodule
