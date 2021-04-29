@@ -127,8 +127,8 @@ module block_controller(
 	assign background_fill= vCount>=(BOTTOM_OF_GRID_Y);
 	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-5) && hCount<=(ball_x+5);
 
-	reg ball_x_vel;
-	reg ball_y_vel;
+	integer ball_x_vel;
+	integer ball_y_vel;
 
 	always@(posedge clk, posedge rst) 
 	begin
@@ -191,16 +191,7 @@ module block_controller(
 
 			ball_x <= ball_x + (ball_x_vel);
 			ball_y <= ball_y + (ball_y_vel);
-			// else if(up) begin
-			// 	ypos<=ypos-2;
-			// 	if(ypos==34)
-			// 		ypos<=514;
-			// end
-			// else if(down) begin
-			// 	ypos<=ypos+2;
-			// 	if(ypos==514)
-			// 		ypos<=34;
-			// end
+			
 		end
 	end
 	
