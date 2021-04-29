@@ -91,6 +91,14 @@ module block_controller(
 		begin
 			rgb = 12'b0000_0000_0000;
 		end
+		else if (state == LOSE)
+		begin
+			rgb = RED;
+		end
+		else if (state == WIN)
+		begin
+			rgb = GREEN;
+		end
 		else if (paddle_fill) 
 		begin
 			rgb = RED;
@@ -272,7 +280,28 @@ module block_controller(
 				begin
 					// data transitions
 					ball_speed <= 0;
-					
+					ball_x <= 480;
+					ball_y <= 200;
+
+					// state transitions
+					if (start && (flag == 0))
+						state <= PHASE_1;
+					else if (start && (flag == 1))
+						state <= PHASE_2;
+					else if (start && (flag == 2))
+						state <= PHASE_3;
+				end
+
+				WIN:
+				begin
+					if (rst)
+						state <= INIT_0;
+				end
+
+				LOSE:
+				begin
+					if (rst)
+						state <= INIT_0;
 				end
 		
 			endcase
@@ -341,10 +370,6 @@ module block_controller(
 					end
 				end
 			end
-
-			ball_x <= ball_x + ball_x_direction*ball_speed;
-			ball_y <= ball_y + ball_y_direction*ball_speed;
-
 		end
 	end
 
@@ -352,6 +377,9 @@ module block_controller(
 
 	task do_block_collisions;
 	begin
+		ball_x <= ball_x + ball_x_direction*ball_speed;
+		ball_y <= ball_y + ball_y_direction*ball_speed;
+
 		for(i = 0; i < 12; i = i + 1)
 				begin
 					for(j = 0; j < 5; j = j + 1)
