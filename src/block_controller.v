@@ -157,14 +157,6 @@ module block_controller(
 	assign background_fill= vCount>=(BOTTOM_OF_GRID_Y);
 	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-5) && hCount<=(ball_x+5);
 
-<<<<<<< HEAD
-	integer ball_x_direction;
-	integer ball_y_direction;
-	integer ball_speed;
-
-	reg [1:0] flag;
-=======
->>>>>>> 1145efe899882d4702d38d9fe53e963acb3fae27
 
 	always@(posedge clk, posedge rst) 
 	begin
