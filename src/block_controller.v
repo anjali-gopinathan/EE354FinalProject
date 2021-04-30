@@ -311,38 +311,64 @@ module block_controller(
 			end
 
 			// block collisions
-			else
-			begin
-				for(i = 0; i < 12; i = i + 1)
-				begin
-					for(j = 0; j < 5; j = j + 1)
-					begin
-						if (collide_block(blocks[j][i][21:12], blocks[j][i][11:2]))
-						begin
-							if (~blocks[j][i][0])			// block has not already been hit
-							begin
-								if(score_ones == 9)
-								begin
-									score_ones <= 0;
-									score_tens <= score_tens + 1;
-									if(score_tens == 9)
-									begin
-										score_tens <= 9;
-										score_ones <= 9;
-									end
-								end
-								else
-								begin
-									score_ones <= score_ones + 1;
-								end
+			// else
+			// begin
+			// 	for(i = 0; i < 12; i = i + 1)
+			// 	begin
+			// 		for(j = 0; j < 5; j = j + 1)
+			// 		begin
+			// 			if (collide_block(blocks[j][i][21:12], blocks[j][i][11:2]))
+			// 			begin
+			// 				if (~blocks[j][i][0])			// block has not already been hit
+			// 				begin
+			// 					if(score_ones == 9)
+			// 					begin
+			// 						score_ones <= 0;
+			// 						score_tens <= score_tens + 1;
+			// 						if(score_tens == 9)
+			// 						begin
+			// 							score_tens <= 9;
+			// 							score_ones <= 9;
+			// 						end
+			// 					end
+			// 					else
+			// 					begin
+			// 						score_ones <= score_ones + 1;
+			// 					end
 
-								blocks[j][i][0] = 1;					// set block to hit
-								ball_y_direction = -ball_y_direction;	// reverse ball's y direction
-							end
+			// 					blocks[j][i][0] = 1;					// set block to hit
+			// 					ball_y_direction = -ball_y_direction;	// reverse ball's y direction
+			// 				end
+			// 			end
+			// 		end
+			// 	end
+			// end
+			if (((ball_y - CEILING_Y)/BLOCK_HEIGHT) < 5)		// ball's location is in range of block grid
+			begin
+				if (~blocks[(ball_y - CEILING_Y)/BLOCK_HEIGHT][(ball_x-LEFT_WALL_X)/BLOCK_WIDTH][0])	//block has not already been hit
+				begin
+					if(score_ones == 9)
+					begin
+						score_ones <= 0;
+						score_tens <= score_tens + 1;
+						if(score_tens == 9)
+						begin
+							score_tens <= 9;
+							score_ones <= 9;
 						end
 					end
+					else
+					begin
+						score_ones <= score_ones + 1;
+					end
+
+					blocks[(ball_y - CEILING_Y)/BLOCK_HEIGHT][(ball_x-LEFT_WALL_X)/BLOCK_WIDTH][0] = 1;					// set block to hit
+					ball_y_direction = -ball_y_direction;	// reverse ball's y direction
+					
 				end
+				
 			end
+
 
 			if (state == PHASE_1 || state == PHASE_2 || state == PHASE_3)
 			begin
@@ -357,7 +383,7 @@ module block_controller(
 				ball_x <= ball_x + ball_x_direction*ball_speed;
 				ball_y <= ball_y + ball_y_direction*ball_speed;
 			end
-			
+
 		end
 	end
 
