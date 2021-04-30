@@ -62,6 +62,8 @@ module block_controller(
 	integer ball_x_direction;
 	integer ball_y_direction;
 	integer ball_speed;
+	integer score;
+
 
 	reg [1:0] flag;			// indicates which phase the game was last in
 	reg [2:0] state;
@@ -345,29 +347,16 @@ module block_controller(
 			// end
 			if ((ball_y - CEILING_Y) < (BLOCK_HEIGHT*5))		// ball's location is in range of block grid
 			begin
-				if (~blocks[$floor((ball_y - CEILING_Y)/BLOCK_HEIGHT)][$floor((ball_x-LEFT_WALL_X)/BLOCK_WIDTH)][0])	//block has not already been hit
+				if (~blocks[(ball_y - CEILING_Y)/BLOCK_HEIGHT][(ball_x-LEFT_WALL_X)/BLOCK_WIDTH][0])	//block has not already been hit
 				begin
-					if(score_ones == 9)
-					begin
-						score_ones <= 0;
-						score_tens <= score_tens + 1;
-						if(score_tens == 9)
-						begin
-							score_tens <= 9;
-							score_ones <= 9;
-						end
-					end
-					else
-					begin
-						score_ones <= score_ones + 1;
-					end
-
-					blocks[$floor((ball_y - CEILING_Y)/BLOCK_HEIGHT)][$floor((ball_x-LEFT_WALL_X)/BLOCK_WIDTH)][0] <= 1;	// set block to hit
+					blocks[(ball_y - CEILING_Y)/BLOCK_HEIGHT][(ball_x-LEFT_WALL_X)/BLOCK_WIDTH][0] <= 1;	// set block to hit
 					ball_y_direction <= -ball_y_direction;																	// reverse ball's y direction
-					
 				end
-				
 			end
+
+			score_ones <= score % 10;
+			score_tens <= score / 10;
+
 
 
 			if (state == PHASE_1 || state == PHASE_2 || state == PHASE_3)
@@ -386,6 +375,40 @@ module block_controller(
 
 		end
 	end
+	always @ (*)
+	begin
+		score = 0;
+		//increment score if block has been hit
+		// score_ones = 0;
+		// score_tens = 0;
+		for (i = 0; i < 5; i = i + 1)
+		begin
+			for (j = 0; j < 12; j = j + 1)
+			begin
+				score = score + blocks[i][j][0];
+			// if (blocks[i][j][0])		// if block has been hit
+			// begin
+			// 	score = score + 1;
+				// if(score_ones == 9)
+				// begin
+				// 	score_ones = 0;
+				// 	score_tens = score_tens + 1;
+				// 	if(score_tens == 9)
+				// 	begin
+				// 		score_tens = 9;
+				// 		score_ones = 9;
+				// 	end
+				// end
+				// else
+				// begin
+				// 	score_ones = score_ones + 1;
+				// end
+			// end
+			end
+
+		end
+	end
+
 
 	// ball collision functions
 
