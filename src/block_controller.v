@@ -345,7 +345,7 @@ module block_controller(
 			// end
 			if ((ball_y - CEILING_Y) < (BLOCK_HEIGHT*5))		// ball's location is in range of block grid
 			begin
-				if (~blocks[$floor((ball_y - CEILING_Y)/BLOCK_HEIGHT)][$floor((ball_x-LEFT_WALL_X)/BLOCK_WIDTH)][0])	//block has not already been hit
+				if (~blocks[(ball_y - CEILING_Y)/BLOCK_HEIGHT][(ball_x-LEFT_WALL_X)/BLOCK_WIDTH][0])	//block has not already been hit
 				begin
 					if(score_ones == 9)
 					begin
@@ -362,7 +362,7 @@ module block_controller(
 						score_ones <= score_ones + 1;
 					end
 
-					blocks[$floor((ball_y - CEILING_Y)/BLOCK_HEIGHT)][$floor((ball_x-LEFT_WALL_X)/BLOCK_WIDTH)][0] <= 1;	// set block to hit
+					blocks[(ball_y - CEILING_Y)/BLOCK_HEIGHT][(ball_x-LEFT_WALL_X)/BLOCK_WIDTH][0] <= 1;	// set block to hit
 					ball_y_direction <= -ball_y_direction;																	// reverse ball's y direction
 					
 				end
