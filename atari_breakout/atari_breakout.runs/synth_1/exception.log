@@ -1,0 +1,4 @@
+ERROR: Exception caught trying to open file C:\Users\Anjali\Documents\Spring2021\EE354L\354finalproj\EE354FinalProject\atari_breakout\atari_breakout.runs\synth_1/runme.log
+	Exception name: Error
+	Exception error code: 70
+	Exception message: Permission denied
