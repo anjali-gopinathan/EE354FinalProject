@@ -48,7 +48,7 @@ module block_controller(
 	PADDLE_WIDTH = 25,
 	PADDLE_HEIGHT = 5;
 
-	integer BLOCK_WIDTH = (RIGHT_WALL_X - LEFT_WALL_X) / 12;		// 53 ish
+	integer BLOCK_WIDTH = (RIGHT_WALL_X - LEFT_WALL_X) / 12;
 	integer BLOCK_HEIGHT = (BOTTOM_OF_GRID_Y - CEILING_Y) / 5;
 	
 	// array of blocks:
@@ -195,7 +195,7 @@ module block_controller(
 			end
 
 		end
-		else if (clk) 
+		else
 		begin
 
 			case(state)
@@ -343,9 +343,9 @@ module block_controller(
 			// 		end
 			// 	end
 			// end
-			if (((ball_y - CEILING_Y)/BLOCK_HEIGHT) < 5)		// ball's location is in range of block grid
+			if ((ball_y - CEILING_Y) < (BLOCK_HEIGHT*5))		// ball's location is in range of block grid
 			begin
-				if (~blocks[(ball_y - CEILING_Y)/BLOCK_HEIGHT][(ball_x-LEFT_WALL_X)/BLOCK_WIDTH][0])	//block has not already been hit
+				if (~blocks[$floor((ball_y - CEILING_Y)/BLOCK_HEIGHT)][$floor((ball_x-LEFT_WALL_X)/BLOCK_WIDTH)][0])	//block has not already been hit
 				begin
 					if(score_ones == 9)
 					begin
@@ -362,8 +362,8 @@ module block_controller(
 						score_ones <= score_ones + 1;
 					end
 
-					blocks[(ball_y - CEILING_Y)/BLOCK_HEIGHT][(ball_x-LEFT_WALL_X)/BLOCK_WIDTH][0] = 1;					// set block to hit
-					ball_y_direction = -ball_y_direction;	// reverse ball's y direction
+					blocks[$floor((ball_y - CEILING_Y)/BLOCK_HEIGHT)][$floor((ball_x-LEFT_WALL_X)/BLOCK_WIDTH)][0] <= 1;	// set block to hit
+					ball_y_direction <= -ball_y_direction;																	// reverse ball's y direction
 					
 				end
 				
