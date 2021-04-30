@@ -52,6 +52,9 @@ module vga_top(
 	wire [3:0]	SSD7, SSD1, SSD0;
 	reg [7:0]  	SSD_CATHODES;
 	wire [1:0] 	ssdscan_clk;
+	wire [3:0] score_ones;
+	wire [3:0] score_tens;
+	wire [3:0] lives;
 	
 	reg [27:0]	DIV_CLK;
 	always @ (posedge ClkPort, posedge Reset)  

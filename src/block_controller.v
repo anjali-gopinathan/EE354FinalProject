@@ -21,10 +21,11 @@ module block_controller(
 	integer i;
 	integer j;
 	
-	//these two values dictate the center of the block, incrementing and decrementing them leads the block to move in certain directions
-	reg [9:0] xpos, ypos;
+	//these two values dictate the center of the paddle, incrementing and decrementing them leads the block to move in certain directions
+	reg [9:0] paddle_x, paddle_y;
 	reg [9:0] ball_x, ball_y;
 	
+	// colors
 	localparam
 	RED			= 12'b1111_0000_0000,
 	WHITE		= 12'b1111_1111_1111,
@@ -35,7 +36,7 @@ module block_controller(
 	BLACK		= 12'b0000_0000_0000,
 	PURPLE		= 12'b1000_0010_1111;
 	
-	
+	// dimensions
 	localparam
 	LEFT_WALL_X = 250,		// supposed to be 144
 	RIGHT_WALL_X = 790,		// maybe 783?
@@ -49,14 +50,12 @@ module block_controller(
 
 	integer BLOCK_WIDTH = (RIGHT_WALL_X - LEFT_WALL_X) / 12;		// 53 ish
 	integer BLOCK_HEIGHT = (BOTTOM_OF_GRID_Y - CEILING_Y) / 5;
-/**	Fill grid of blocks
-*/	
-	// reg [60:0] blocks;
+	
+	// array of blocks:
 	// 21:12 = x position
 	// 11:2 = y position
-	// 1 = color (isRed)
+	// 1 = color (1 = pink, 0 = blue)
 	// 0 = has been hit or not
-	// ------ 0 = vCount and hCount overlap block area ------- not doing this
 	reg [21:0] blocks [0:4][0:11];
 	wire blocks_fill [0:4][0:11];
 
@@ -64,33 +63,24 @@ module block_controller(
 	integer ball_y_direction;
 	integer ball_speed;
 
-	reg [1:0] flag;
+	reg [1:0] flag;			// indicates which phase the game was last in
 	reg [2:0] state;
 	localparam
 	INIT_0 = 3'b000, INIT_1 = 3'b001, PHASE_1 = 3'b010, PHASE_2 = 3'b011, PHASE_3 = 3'b100, WIN = 3'b101, LOSE = 3'b110;
 
-
-
-	// each block will be 53 wide, 12 blocks wide, 0px in between each block
-	// 25 pixels tall, 5 rows, 0 px in between
-	// entire vga monitor pixels:
-	// cols aka x pos: starts at 144 ends at 780
-	// rows aka y pos: starts at 34px, ends at ~514px
-	// but for our block_grid, rows end at 159 px.
+	// for loop to initialize blocks_fill, which keeps track of whether hcount and vcount overlap with each block
 	genvar block_i;
 	genvar block_j;
 	generate
 	for(block_i = 0; block_i < 12; block_i = block_i + 1)
-	begin			// i represents x pos
+	begin														// i represents x pos
 		for( block_j = 0; block_j < 5; block_j = block_j + 1)
-		begin		// j represents y pos	
-			// parameter x_pos = block_i*53 + 144;
-			// parameter y_pos = block_j*25 + 34;		
+		begin													// j represents y pos		
 			assign blocks_fill[block_j][block_i] = 
-				(vCount >= ((block_j*BLOCK_HEIGHT) + CEILING_Y)) &&		// top
+				(vCount >= ((block_j*BLOCK_HEIGHT) + CEILING_Y)) &&						// top
 				(vCount <= ((block_j*BLOCK_HEIGHT) + CEILING_Y + BLOCK_HEIGHT)) &&		// bottom
-				(hCount >= ((block_i* BLOCK_WIDTH) + LEFT_WALL_X)) &&		// left
-				(hCount <= ((block_i* BLOCK_WIDTH) + LEFT_WALL_X + BLOCK_WIDTH));			// right
+				(hCount >= ((block_i* BLOCK_WIDTH) + LEFT_WALL_X)) &&					// left
+				(hCount <= ((block_i* BLOCK_WIDTH) + LEFT_WALL_X + BLOCK_WIDTH));		// right
 		end
 	end
 	endgenerate
@@ -98,7 +88,7 @@ module block_controller(
 	/*when outputting the rgb value in an always block like this, make sure to include the if(~bright) statement, as this ensures the monitor 
 	will output some data to every pixel and not just the images you are trying to display*/
 	always@ (*) begin
-    	if(~bright )	//force black if not inside the display area
+    	if(~bright )					//force black if not inside the display area
 		begin
 			rgb = 12'b0000_0000_0000;
 		end
@@ -153,7 +143,7 @@ module block_controller(
 	end
 	
 	//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
-	assign paddle_fill=vCount>=(ypos-5) && vCount<=(ypos+5) && hCount>=(xpos-25) && hCount<=(xpos+25);
+	assign paddle_fill=vCount>=(paddle_y-5) && vCount<=(paddle_y+5) && hCount>=(paddle_x-25) && hCount<=(paddle_x+25);
 	assign background_fill= vCount>=(BOTTOM_OF_GRID_Y);
 	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-5) && hCount<=(ball_x+5);
 
@@ -172,8 +162,8 @@ module block_controller(
 			// lives <= 3;
 
 			// paddle
-			xpos <= 450;
-			ypos <= 500;
+			paddle_x <= 450;
+			paddle_y <= 500;
 
 			// ball
 			ball_x <= 9'bx;
@@ -320,17 +310,17 @@ module block_controller(
 			corresponds to ~(783,515).  
 		*/
 			if(right) begin
-				xpos<=xpos+2; //change the amount you increment to make the speed faster 
-				if(xpos==800) //these are rough values to attempt looping around, you can fine-tune them to make it more accurate- refer to the block comment above
-					xpos<=800;		// if wrapping, set to 150
+				paddle_x<=paddle_x+2; //change the amount you increment to make the speed faster 
+				if(paddle_x==800) //these are rough values to attempt looping around, you can fine-tune them to make it more accurate- refer to the block comment above
+					paddle_x<=800;		// if wrapping, set to 150
 			end
 			else if(left) begin
-				xpos<=xpos-2;
-				if(xpos==150)
-					xpos<=150;		// if wrapping, set xpos to 800
+				paddle_x<=paddle_x-2;
+				if(paddle_x==150)
+					paddle_x<=150;		// if wrapping, set paddle_x to 800
 			end
 
-			if (collide_paddle(xpos, ypos))									// paddle collision
+			if (collide_paddle(paddle_x, paddle_y))									// paddle collision
 			begin
 				ball_y_direction = -ball_y_direction;						// reverse ball's y direction
 			end
