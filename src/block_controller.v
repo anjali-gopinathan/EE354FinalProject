@@ -279,20 +279,6 @@ module block_controller(
 				end
 		
 			endcase
-
-			if (state == PHASE_1 || state == PHASE_2 || state == PHASE_3)
-			begin
-				if (ball_y >= FLOOR_Y)
-					lives <= lives - 1;
-
-				if ((ball_y >= FLOOR_Y) && (lives > 1))
-					state <= INIT_1;
-				if ((ball_y >= FLOOR_Y) && (lives <= 1))
-					state <= LOSE;
-				
-				ball_x <= ball_x + ball_x_direction*ball_speed;
-				ball_y <= ball_y + ball_y_direction*ball_speed;
-			end
 			
 		/* Note that the top left of the screen does NOT correlate to vCount=0 and hCount=0. The display_controller.v file has the 
 			synchronizing pulses for both the horizontal sync and the vertical sync begin at vcount=0 and hcount=0. Recall that after 
@@ -311,7 +297,7 @@ module block_controller(
 					paddle_x<=150;		// if wrapping, set paddle_x to 800
 			end
 
-			if (collide_paddle(paddle_x, paddle_y))									// paddle collision
+			if (collide_paddle(paddle_x, paddle_y))							// paddle collision
 			begin
 				ball_y_direction = -ball_y_direction;						// reverse ball's y direction
 			end
@@ -357,6 +343,21 @@ module block_controller(
 					end
 				end
 			end
+
+			if (state == PHASE_1 || state == PHASE_2 || state == PHASE_3)
+			begin
+				if (ball_y >= FLOOR_Y)
+					lives <= lives - 1;
+
+				if ((ball_y >= FLOOR_Y) && (lives > 1))
+					state <= INIT_1;
+				if ((ball_y >= FLOOR_Y) && (lives <= 1))
+					state <= LOSE;
+				
+				ball_x <= ball_x + ball_x_direction*ball_speed;
+				ball_y <= ball_y + ball_y_direction*ball_speed;
+			end
+			
 		end
 	end
 
