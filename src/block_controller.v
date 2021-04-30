@@ -38,7 +38,7 @@ module block_controller(
 	
 	// dimensions
 	localparam
-	LEFT_WALL_X = 250,		// supposed to be 144
+	LEFT_WALL_X = 245,		// supposed to be 144
 	RIGHT_WALL_X = 790,		// maybe 783?
 	CEILING_Y = 35,
 	FLOOR_Y = 515,
@@ -114,16 +114,15 @@ module block_controller(
 			begin
 				for( j = 0; j < 5; j = j + 1 )
 				begin
-					if(blocks_fill[j][i] == 1)	// hcount and vcount are on top of the block
+					if(blocks_fill[j][i] == 1)			// hcount and vcount are on top of the block
 					begin
-						if(blocks[j][i][0] == 1)// if block has been hit
+						if(blocks[j][i][0] == 1)		// if block has been hit
 						begin
-							//set rgb to background
-							rgb=WHITE;
+							rgb=WHITE;					//set rgb to background
 						end
-						else	//block has not been hit
+						else							//block has not been hit
 						begin
-							if(blocks[j][i][1] == 1)		// alternating block colors
+							if(blocks[j][i][1] == 1)	// alternating block colors
 							begin
 								rgb=PINK;
 							end
@@ -136,13 +135,12 @@ module block_controller(
 				end
 			end
 		end
-		else	// background fill (hcount and vcount are below the blocks)
+		else											// background fill (hcount and vcount are below the blocks)
 		begin
 			rgb = WHITE;
 		end
 	end
 	
-	//the +-5 for the positions give the dimension of the block (i.e. it will be 50x10 pixels), 50 wide, 10 tall
 	assign paddle_fill=vCount>=(paddle_y-5) && vCount<=(paddle_y+5) && hCount>=(paddle_x-25) && hCount<=(paddle_x+25);
 	assign background_fill= vCount>=(BOTTOM_OF_GRID_Y);
 	assign ball_fill=vCount>=(ball_y-5) && vCount<=(ball_y+5) && hCount>=(ball_x-5) && hCount<=(ball_x+5);
@@ -224,17 +222,10 @@ module block_controller(
 					// data transitions
 					ball_speed <= 1;
 					flag <= 0;
-					if (ball_y >= FLOOR_Y)
-						lives <= lives - 1;
-					do_block_collisions();
 
 					// state transitions
 					if (score_tens == 2)
 						state <= PHASE_2;
-					if (ball_y >= FLOOR_Y)
-						state <= INIT_1;
-					if (lives == 0)
-						state <= LOSE;
 				end
 
 				PHASE_2:
@@ -242,17 +233,10 @@ module block_controller(
 					// data transitions
 					ball_speed <= 2;
 					flag <= 1;
-					if (ball_y >= FLOOR_Y)
-						lives <= lives - 1;
-					do_block_collisions();
 
 					// state transitions
 					if (score_tens == 4)
 						state <= PHASE_3;
-					if (ball_y >= FLOOR_Y)
-						state <= INIT_1;
-					if (lives == 0)
-						state <= LOSE;
 				end
 
 				PHASE_3:
@@ -260,17 +244,10 @@ module block_controller(
 					// data transitions
 					ball_speed <= 3;
 					flag <= 1;
-					if (ball_y >= FLOOR_Y)
-						lives <= lives - 1;
-					do_block_collisions();
 
 					// state transitions
 					if (score_tens == 6)
 						state <= WIN;
-					if (ball_y >= FLOOR_Y)
-						state <= INIT_1;
-					if (lives == 0)
-						state <= LOSE;
 				end
 
 				INIT_1:
@@ -302,6 +279,20 @@ module block_controller(
 				end
 		
 			endcase
+
+			if (state == PHASE_1 || state == PHASE_2 || state == PHASE_3)
+			begin
+				if (ball_y >= FLOOR_Y)
+					lives <= lives - 1;
+
+				if ((ball_y >= FLOOR_Y) && (lives > 1))
+					state <= INIT_1;
+				if ((ball_y >= FLOOR_Y) && (lives <= 1))
+					state <= LOSE;
+				
+				ball_x <= ball_x + ball_x_direction*ball_speed;
+				ball_y <= ball_y + ball_y_direction*ball_speed;
+			end
 			
 		/* Note that the top left of the screen does NOT correlate to vCount=0 and hCount=0. The display_controller.v file has the 
 			synchronizing pulses for both the horizontal sync and the vertical sync begin at vcount=0 and hcount=0. Recall that after 
@@ -366,54 +357,10 @@ module block_controller(
 					end
 				end
 			end
-
-			if (state == PHASE_1 || state == PHASE_2 || state == PHASE_3)
-			begin
-				ball_x <= ball_x + ball_x_direction*ball_speed;
-				ball_y <= ball_y + ball_y_direction*ball_speed;
-			end
 		end
 	end
 
 	// ball collision functions
-
-	task do_block_collisions;
-	begin
-		ball_x <= ball_x + ball_x_direction*ball_speed;
-		ball_y <= ball_y + ball_y_direction*ball_speed;
-
-		for(i = 0; i < 12; i = i + 1)
-				begin
-					for(j = 0; j < 5; j = j + 1)
-					begin
-						if (collide_block(blocks[j][i][21:12], blocks[j][i][11:2]))
-						begin
-							if (~blocks[j][i][0])			// block has not already been hit
-							begin
-								if(score_ones == 9)
-								begin
-									score_ones <= 0;
-									score_tens <= score_tens + 1;
-									if(score_tens == 9)
-									begin
-										score_tens <= 9;
-										score_ones <= 9;
-									end
-								end
-								else
-								begin
-									score_ones <= score_ones + 1;
-								end
-
-								blocks[j][i][0] = 1;					// set block to hit
-								ball_y_direction = -ball_y_direction;	// reverse ball's y direction
-							end
-						end
-					end
-				end
-	end
-	endtask
-
 
 	function collide_block;
 		input [9:0] block_x;
