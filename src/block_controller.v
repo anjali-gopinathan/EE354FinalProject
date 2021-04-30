@@ -97,7 +97,7 @@ module block_controller(
 		end
 		else if (state == WIN)
 		begin
-			rgb = GREEN;
+			rgb = BRIGHT_GREEN;
 		end
 		else if (paddle_fill) 
 		begin
@@ -151,9 +151,6 @@ module block_controller(
 	integer ball_speed;
 
 	reg [1:0] flag;
-	reg [2:0] state;
-	localparam
-	INIT_0 = 3'b000, INIT_1 = 3'b001, PHASE_1 = 3'b010, PHASE_2 = 3'b011, PHASE_3 = 3'b100, WIN = 3'b101, LOSE = 3'b110;
 
 	always@(posedge clk, posedge rst) 
 	begin
@@ -161,31 +158,33 @@ module block_controller(
 		begin 
 			state <= INIT_0;
 
-			//rough values for center of screen
-			background <= WHITE;
-			// score_ones <= 4'bx;
-			// score_tens <= 4'bx;
-			// lives <= 4'bx;
-			score_ones <= 0;
-			score_tens <= 0;
-			lives <= 9;
+			score_ones <= 4'bx;
+			score_tens <= 4'bx;
+			lives <= 4'bx;
+			// score_ones <= 0;
+			// score_tens <= 0;
+			// lives <= 3;
 
+			// paddle
 			xpos <= 450;
 			ypos <= 500;
 
-			ball_x <= 9'bx;		//later want to randomize this position
+			// ball
+			ball_x <= 9'bx;
 			ball_y <= 9'bx;
 
 			flag <= 2'bx;
 			
+			// initialize blocks
 			for(i = 0; i < 12; i = i + 1)
-			begin			// i represents x pos
+			begin																// i represents x pos
 				for( j = 0; j < 5; j = j + 1 )
-				begin: block_init		// j represents y pos			
-					// parameter x_pos = block_i*53 + 144;
-					// parameter y_pos = block_j*25 + 34;						
-					blocks[j][i][21:12] <= i*BLOCK_WIDTH + LEFT_WALL_X;		// x pos
-					blocks[j][i][11:2] <= j*BLOCK_HEIGHT + CEILING_Y;		// y pos
+				begin: block_init												// j represents y pos	
+					// set block coordinates								
+					blocks[j][i][21:12] <= i*BLOCK_WIDTH + LEFT_WALL_X;			// x pos
+					blocks[j][i][11:2] <= j*BLOCK_HEIGHT + CEILING_Y;			// y pos
+
+					// set block color
 					if ((i % 2) == 0)
 						begin
 							if ((j % 2) == 0) blocks[j][i][1] <= 0;				// 1 = pink
@@ -196,12 +195,14 @@ module block_controller(
 							if ((j % 2) == 0) blocks[j][i][1] <= 1;
 							else blocks[j][i][1] <= 0;
 						end
+						
 					blocks[j][i][0] <= 0;		// initialize block to state of being not hit
 				end
 			end
 
 		end
-		else if (clk) begin
+		else if (clk) 
+		begin
 
 			case(state)
 				INIT_0:
@@ -235,7 +236,7 @@ module block_controller(
 					if (score_tens == 2)
 						state <= PHASE_2;
 					if (ball_y >= FLOOR_Y)
-						state <= INIT_2;
+						state <= INIT_1;
 					if (lives == 0)
 						state <= LOSE;
 				end
@@ -253,7 +254,7 @@ module block_controller(
 					if (score_tens == 4)
 						state <= PHASE_3;
 					if (ball_y >= FLOOR_Y)
-						state <= INIT_2;
+						state <= INIT_1;
 					if (lives == 0)
 						state <= LOSE;
 				end
@@ -271,7 +272,7 @@ module block_controller(
 					if (score_tens == 6)
 						state <= WIN;
 					if (ball_y >= FLOOR_Y)
-						state <= INIT_2;
+						state <= INIT_1;
 					if (lives == 0)
 						state <= LOSE;
 				end
@@ -323,8 +324,7 @@ module block_controller(
 					xpos<=150;		// if wrapping, set xpos to 800
 			end
 
-			// paddle collision
-			if (collide_paddle(xpos, ypos))
+			if (collide_paddle(xpos, ypos))									// paddle collision
 			begin
 				ball_y_direction = -ball_y_direction;						// reverse ball's y direction
 			end
@@ -369,6 +369,12 @@ module block_controller(
 						end
 					end
 				end
+			end
+
+			if (state == PHASE_1 || state == PHASE_2 || state == PHASE_3)
+			begin
+				ball_x <= ball_x + ball_x_direction*ball_speed;
+				ball_y <= ball_y + ball_y_direction*ball_speed;
 			end
 		end
 	end
