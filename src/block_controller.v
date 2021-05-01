@@ -312,39 +312,6 @@ module block_controller(
 				ball_y_direction = -ball_y_direction;
 			end
 
-			// block collisions
-			// else
-			// begin
-			// 	for(i = 0; i < 12; i = i + 1)
-			// 	begin
-			// 		for(j = 0; j < 5; j = j + 1)
-			// 		begin
-			// 			if (collide_block(blocks[j][i][21:12], blocks[j][i][11:2]))
-			// 			begin
-			// 				if (~blocks[j][i][0])			// block has not already been hit
-			// 				begin
-			// 					if(score_ones == 9)
-			// 					begin
-			// 						score_ones <= 0;
-			// 						score_tens <= score_tens + 1;
-			// 						if(score_tens == 9)
-			// 						begin
-			// 							score_tens <= 9;
-			// 							score_ones <= 9;
-			// 						end
-			// 					end
-			// 					else
-			// 					begin
-			// 						score_ones <= score_ones + 1;
-			// 					end
-
-			// 					blocks[j][i][0] = 1;					// set block to hit
-			// 					ball_y_direction = -ball_y_direction;	// reverse ball's y direction
-			// 				end
-			// 			end
-			// 		end
-			// 	end
-			// end
 			if ((ball_y - CEILING_Y) < (BLOCK_HEIGHT*5))		// ball's location is in range of block grid
 			begin
 				if (~blocks[(ball_y - CEILING_Y)/BLOCK_HEIGHT][(ball_x-LEFT_WALL_X)/BLOCK_WIDTH][0])	//block has not already been hit
@@ -379,31 +346,11 @@ module block_controller(
 	begin
 		score = 0;
 		//increment score if block has been hit
-		// score_ones = 0;
-		// score_tens = 0;
 		for (i = 0; i < 5; i = i + 1)
 		begin
 			for (j = 0; j < 12; j = j + 1)
 			begin
 				score = score + blocks[i][j][0];
-			// if (blocks[i][j][0])		// if block has been hit
-			// begin
-			// 	score = score + 1;
-				// if(score_ones == 9)
-				// begin
-				// 	score_ones = 0;
-				// 	score_tens = score_tens + 1;
-				// 	if(score_tens == 9)
-				// 	begin
-				// 		score_tens = 9;
-				// 		score_ones = 9;
-				// 	end
-				// end
-				// else
-				// begin
-				// 	score_ones = score_ones + 1;
-				// end
-			// end
 			end
 
 		end
